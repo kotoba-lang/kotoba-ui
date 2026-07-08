@@ -43,3 +43,5 @@ jobs:
         run: git clone --depth 1 https://github.com/kotoba-lang/liquid-glass-ui ../liquid-glass-ui
       - name: Run tests
         run: clojure -M:test
+      - name: Lint
+        run: clojure -M:lint
