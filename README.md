@@ -8,10 +8,28 @@ skin) and re-exports their public API as one namespace. A product repo that
 requires only `kotoba-ui.core` gets structure + material + all 29 glass
 components in one `require`.
 
-`kotoba-ui.core` owns **no logic of its own** — every var is a direct alias
+On top of the aliases, `kotoba-ui` owns the two layers the stack was missing
+(consumers used to hand-write 400+ lines of ad-hoc page CSS without them):
+
+- **`kotoba-ui.shell`** — pure-hiccup HIG layout scaffolds (`app-shell`,
+  `hero`, `section`, `grid`, `stack`, `spacer`, `page`) whose structural CSS
+  lives inside `@layer kotoba.hig` and references only `--hig-*` tokens.
+- **`kotoba-ui.theme`** — one theme map (`{:accent "#RRGGBB"
+  :appearance :auto|:light|:dark ...}`) as the *only* styling entry;
+  `theme-css` emits the complete page CSS (HIG + glass + shell, cascade
+  layers in canonical order).
+- **`kotoba-ui.core/->page`** — the one-call SSR entry: doctype + full
+  document (meta, title, theme CSS, `data-appearance`) from hiccup.
+
+**Before building any frontend on this stack, read
+[`docs/agent-guide.md`](docs/agent-guide.md)** — the paved-road recipe
+(stack diagram, the 8 non-negotiable rules, a complete worked example, and
+a do/don't table distilled from real production failures).
+
+Everything else in `kotoba-ui.core` is a direct alias
 (`(def button liquid-glass.components/button)`, …) of a shitsuke or
-liquid-glass var. It is the thinnest possible composition layer, not a new
-design system: see `docs/adr/0001-kotoba-ui.md` and the superproject decision
+liquid-glass var — a thin composition layer, not a new design system: see
+`docs/adr/0001-kotoba-ui.md` and the superproject decision
 `90-docs/adr/2607022800-kotoba-lang-default-uiux-appkit-uikit-interface-fundamentals.md`.
 
 ## Not to be confused with `orgs/kotoba-lang/ui`
@@ -28,13 +46,25 @@ system* entry point; `ui` (that repo) is a *game HUD* renderer.
 ```clojure
 (require '[kotoba-ui.core :as ui])
 
+;; a complete refined page in one call — layout from shell, styling from
+;; one theme map (see docs/agent-guide.md for the full worked example):
+(ui/->page {:title "App" :theme {:accent "#FF3CAC" :appearance :dark}}
+           (ui/app-shell {:nav (ui/nav-bar "App")}
+                         (ui/hero {:title "Hello" :tagline "One call."
+                                   :actions [(ui/button "Go" {:act :go})]})
+                         (ui/section {:title "Cards"}
+                                     (ui/grid (ui/panel [[:p "a"]])
+                                              (ui/panel [[:p "b"]])))))
+
+;; or piecemeal:
 (def view
   (ui/panel [(ui/toolbar [(ui/icon-button "☰") (ui/badge "3")])
              (ui/tab-bar [[:visual "Visual"] [:edn "EDN"]] :visual)]
             {:surface :thick :elevation :floating}))
 
-(ui/->html view)          ; SSR
-;; once per page/app: (ui/inline-style) — root vars + component CSS
+(ui/->html view)                 ; SSR fragment
+;; once per page/app: (ui/theme-css {...}) — layer order + HIG vars/base +
+;; glass material + shell structure (or (ui/inline-style) for glass only)
 ```
 
 ## Design
