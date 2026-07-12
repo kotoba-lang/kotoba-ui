@@ -5,10 +5,13 @@
   90-docs/adr/2607022800-kotoba-lang-default-uiux-appkit-uikit-interface-fundamentals.md)
   require only `kotoba-ui.core` and get, in one namespace:
   shitsuke's dual-render hiccup contract + liquid-glass-ui's material tokens/
-  style/29 components. This namespace owns no logic of its own — every var
-  below is a direct alias of a shitsuke or liquid-glass var; see the source
-  repo's docstring for behavior. Adding a component/token here means adding
-  the alias, nothing else — see docs/adr/0001-kotoba-ui.md.
+  style/29 components + kotoba-ui's own shell (HIG layout scaffolds) and
+  theme (one-map styling entry) layers. Every var below is a direct alias of
+  a shitsuke, liquid-glass, or kotoba-ui.shell/theme var — see the source
+  namespace's docstring for behavior — except `->page`, a one-line
+  composition (doctype + ->html over shell/page). Adding a component/token
+  here means adding the alias, nothing else — see docs/adr/0001-kotoba-ui.md.
+  Before building any frontend on this, read docs/agent-guide.md.
 
   Not to be confused with the pre-existing `orgs/kotoba-lang/ui` repo
   (package `kotoba.ui`), which is kami-engine's unrelated WebGPU HUD overlay
@@ -16,7 +19,9 @@
   (:require [shitsuke.hiccup :as hiccup]
             [liquid-glass.tokens :as tokens]
             [liquid-glass.style :as style]
-            [liquid-glass.components :as glass]))
+            [liquid-glass.components :as glass]
+            [kotoba-ui.theme :as theme]
+            [kotoba-ui.shell :as shell]))
 
 ;; -- hiccup (shitsuke.hiccup) -------------------------------------------------
 
@@ -83,3 +88,35 @@
 (def divider glass/divider)
 (def tooltip glass/tooltip)
 (def lens-filter-defs glass/lens-filter-defs)
+
+;; -- theme (kotoba-ui.theme) ----------------------------------------------------
+;; One theme map — {:accent "#RRGGBB" :appearance :auto|:light|:dark ...} —
+;; is the only styling entry an app needs; see kotoba-ui.theme's docstring.
+
+(def theme-css theme/theme-css)
+(def appearance-attr theme/appearance-attr)
+(def hig-overrides theme/hig-overrides)
+(def hig-dark-overrides theme/hig-dark-overrides)
+(def glass-overrides theme/glass-overrides)
+(def glass-dark-overrides theme/glass-dark-overrides)
+(def hex->rgba theme/hex->rgba)
+
+;; -- shell (kotoba-ui.shell) ----------------------------------------------------
+;; HIG layout scaffolds — layout starts here, not with hand-written .layout CSS.
+
+(def stack shell/stack)
+(def spacer shell/spacer)
+(def section shell/section)
+(def hero shell/hero)
+(def grid shell/grid)
+(def app-shell shell/app-shell)
+(def page shell/page)
+(def shell-css shell/shell-css)
+
+(defn ->page
+  "The one-call SSR entry: a complete refined HTML document string —
+  doctype + shell/page (charset/viewport/title/theme CSS/data-appearance)
+  rendered via ->html. opts as kotoba-ui.shell/page (:title :description
+  :lang :theme :head)."
+  [opts & body]
+  (str "<!doctype html>" (->html (apply shell/page opts body))))
