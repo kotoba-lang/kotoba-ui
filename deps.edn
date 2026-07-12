@@ -1,12 +1,17 @@
 {:paths ["src"]
- ;; Thin composition layer: kotoba-ui.core requires shitsuke (structure/dual-render
+ ;; Composition layer: kotoba-ui.core requires shitsuke (structure/dual-render
  ;; contract) + liquid-glass-ui (material skin) and re-exports their public API as a
- ;; single require point. Owns no tokens/CSS/component logic of its own — see
- ;; docs/adr/0001-kotoba-ui.md. Not to be confused with the pre-existing
- ;; orgs/kotoba-lang/ui repo (package kotoba.ui), which is kami-engine's unrelated
- ;; WebGPU HUD overlay renderer.
+ ;; single require point, plus kotoba-ui's own shell (HIG layout scaffolds) and
+ ;; theme (one-map styling entry) namespaces — see docs/adr/0001-kotoba-ui.md and
+ ;; docs/agent-guide.md. kotoba-lang/css is required directly by kotoba-ui.shell.style
+ ;; (shell rules are EDN data via css.core, same :git/sha as liquid-glass-ui's dep).
+ ;; Not to be confused with the pre-existing orgs/kotoba-lang/ui repo (package
+ ;; kotoba.ui), which is kami-engine's unrelated WebGPU HUD overlay renderer.
  :deps {io.github.kotoba-lang/shitsuke {:local/root "../shitsuke"}
-        io.github.kotoba-lang/liquid-glass-ui {:local/root "../liquid-glass-ui"}}
+        io.github.kotoba-lang/liquid-glass-ui {:local/root "../liquid-glass-ui"}
+        io.github.kotoba-lang/css
+        {:git/url "https://github.com/kotoba-lang/css.git"
+         :git/sha "e8bb830b69aa1a726bb79dbd28f098f0875db673"}}
  :aliases
  {:test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
@@ -14,7 +19,8 @@
          :main-opts ["-m" "cognitect.test-runner"]
          :exec-fn cognitect.test-runner.api/test}
   :local {:override-deps {io.github.kotoba-lang/shitsuke {:local/root "../shitsuke"}
-                          io.github.kotoba-lang/liquid-glass-ui {:local/root "../liquid-glass-ui"}}}
+                          io.github.kotoba-lang/liquid-glass-ui {:local/root "../liquid-glass-ui"}
+                          io.github.kotoba-lang/css {:local/root "../css"}}}
   ;; clj-kondo as a Clojars lib (no Homebrew/system install needed).
   :lint {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2024.11.14"}}
          :main-opts ["-m" "clj-kondo.main" "--lint" "src" "test"
