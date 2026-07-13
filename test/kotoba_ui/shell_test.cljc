@@ -107,6 +107,79 @@
     (let [html (hiccup/->html (shell/page {:title "T" :lang "ja"} [:p "b"]))]
       (is (str/starts-with? html "<html lang=\"ja\"><head>")))))
 
+(deftest root-attrs-passthrough-test
+  (testing ":id lands on the root element"
+    (is (str/starts-with? (hiccup/->html (shell/grid {:id "business-grid"} [:div "c"]))
+                          "<div class=\"kotoba-shell__grid\" id=\"business-grid\">"))
+    (is (str/starts-with? (hiccup/->html (shell/stack {:id "s"} [:p "a"]))
+                          "<div class=\"kotoba-shell__stack\" id=\"s\">"))
+    (is (str/starts-with? (hiccup/->html (shell/hero {:title "T" :id "h"}))
+                          "<header class=\"kotoba-shell__hero\" id=\"h\">"))
+    (is (str/starts-with? (hiccup/->html (shell/app-shell {:id "app"} [:p "c"]))
+                          "<div class=\"kotoba-shell__app\" id=\"app\">"))
+    (is (str/starts-with? (hiccup/->html (shell/spacer {:id "sp"}))
+                          "<div class=\"kotoba-shell__spacer\" aria-hidden id=\"sp\">")))
+  (testing ":class string merges with (never replaces) the shell class"
+    (let [html (hiccup/->html (shell/grid {:class "biz-grid"} [:div "c"]))]
+      (is (str/includes? html "class=\"kotoba-shell__grid biz-grid\"")))
+    (let [html (hiccup/->html (shell/section {:class "intro"} [:p "b"]))]
+      (is (str/includes? html "class=\"kotoba-shell__section intro\""))))
+  (testing ":class vector (strings and keywords) merges space-joined"
+    (let [html (hiccup/->html (shell/stack {:class ["a" :b nil "c"]} [:p "x"]))]
+      (is (str/includes? html "class=\"kotoba-shell__stack a b c\""))))
+  (testing ":attrs passes data-*/aria-*/role through to the root element"
+    (let [html (hiccup/->html (shell/grid {:attrs {:data-kind "biz" :role "list"}}
+                                          [:div "c"]))]
+      (is (str/includes? html "data-kind=\"biz\""))
+      (is (str/includes? html "role=\"list\""))
+      (is (str/includes? html "class=\"kotoba-shell__grid\""))))
+  (testing ":attrs cannot clobber the component's own :class/:style"
+    (let [html (hiccup/->html (shell/grid {:min "320px"
+                                           :attrs {:class "evil"
+                                                   :style {:display "block"}}}
+                                          [:div "c"]))]
+      (is (str/includes? html "class=\"kotoba-shell__grid\""))
+      (is (not (str/includes? html "evil")))
+      (is (str/includes? html "grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));"))
+      (is (not (str/includes? html "display:block")))))
+  (testing "page: :id/:class/:attrs land on <body>, not <html>"
+    (let [html (hiccup/->html (shell/page {:title "T" :id "top" :class "pg"
+                                           :attrs {:data-page "home"}}
+                                          [:p "b"]))]
+      (is (str/starts-with? html "<html lang=\"en\"><head>"))
+      (is (str/includes? html "<body data-page=\"home\" class=\"pg\" id=\"top\"><p>b</p></body>")))))
+
+(deftest root-attrs-backward-compat-test
+  (testing "calls without :id/:class/:attrs are byte-identical to the pre-passthrough output"
+    (is (= "<div class=\"kotoba-shell__stack\"><p>a</p><p>b</p></div>"
+           (hiccup/->html (shell/stack [:p "a"] [:p "b"]))))
+    (is (= (str "<div class=\"kotoba-shell__stack kotoba-shell__stack--horizontal\""
+                " style=\"gap:var(--hig-spacing-6);align-items:center;\"><span>x</span></div>")
+           (hiccup/->html (shell/stack {:direction :horizontal :gap :6 :align :center}
+                                       [:span "x"]))))
+    (is (= "<div class=\"kotoba-shell__spacer\" aria-hidden></div>"
+           (hiccup/->html (shell/spacer))))
+    (is (= (str "<section class=\"kotoba-shell__section\" id=\"docs\">"
+                "<h2 class=\"kotoba-shell__section-title hig-title2\">Docs</h2>"
+                "<p>body</p></section>")
+           (hiccup/->html (shell/section {:title "Docs" :id "docs"} [:p "body"]))))
+    (is (= (str "<header class=\"kotoba-shell__hero\">"
+                "<h1 class=\"kotoba-shell__hero-title hig-large-title\">T</h1>"
+                "<p class=\"kotoba-shell__hero-tagline hig-title3\">tg</p></header>")
+           (hiccup/->html (shell/hero {:title "T" :tagline "tg"}))))
+    (is (= (str "<div class=\"kotoba-shell__grid\""
+                " style=\"grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));\">"
+                "<div>card</div></div>")
+           (hiccup/->html (shell/grid {:min "320px"} [:div "card"]))))
+    (is (= (str "<div class=\"kotoba-shell__app kotoba-shell__app--with-sidebar\">"
+                "<div class=\"kotoba-shell__app-body\">"
+                "<aside class=\"kotoba-shell__app-sidebar\"><nav>links</nav></aside>"
+                "<main class=\"kotoba-shell__app-main\"><p>c</p></main></div></div>")
+           (hiccup/->html (shell/app-shell {:sidebar [:nav "links"]} [:p "c"]))))
+    (let [html (hiccup/->html (shell/page {:title "T" :lang "ja"} [:p "b"]))]
+      (is (str/starts-with? html "<html lang=\"ja\"><head>"))
+      (is (str/ends-with? html "</style></head><body><p>b</p></body></html>")))))
+
 (deftest shell-css-test
   (let [css (shell/shell-css)]
     (testing "everything is inside @layer kotoba.hig"

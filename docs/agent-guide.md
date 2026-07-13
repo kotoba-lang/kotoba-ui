@@ -42,7 +42,14 @@ for app use is re-exported by `kotoba-ui.core`.
 4. **Layout starts from shell.** `app-shell` / `hero` / `section` / `grid` /
    `stack` / `spacer` — no hand-written `.layout` / `.hero` / `.nav-wrap`
    CSS. The shell already handles sticky nav, sidebar collapse, readable
-   measure, and the `min-width: 0` overflow guards.
+   measure, and the `min-width: 0` overflow guards. Need an id / class /
+   data-attr on a scaffold (JS targeting, app-CSS hook, aria)? Every
+   scaffold's opts map takes `:id` / `:class` (string or vector — merged
+   with the shell class) / `:attrs` (any other attribute map) — **don't
+   mirror shell CSS in app CSS** just to get a selectable element (a real
+   consumer duplicated the grid rules for a `#business-grid` hook before
+   this existed). `:attrs` can't clobber the component's own
+   :class/:style; on `page` these land on `<body>`.
 5. **Theme = one map.** `{:accent "#RRGGBB" :accent-dark "#RRGGBB"
    :appearance :auto|:light|:dark :hig {...} :glass {...}}` passed to
    `->page` (or `theme-css`). That is the *only* place a hex color is
