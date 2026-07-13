@@ -1,0 +1,127 @@
+(ns kotoba-ui.design-quality-gate-test
+  "Self-scoring design-quality gate (ADR-2607132300: an unmeasured metric is
+  theater).
+
+  Renders representative FULL pages with kotoba-ui.core/->page — the same
+  one-call entry every consumer uses — and scores the actual emitted HTML +
+  inline CSS with kotoba-lang/design-quality's deterministic HIG/WCAG audit
+  (full 12-axis rubric, `:extra-axes`). The gate asserts the aggregate and
+  each page stay at or above a floor set from the honestly measured score
+  minus a small margin, so any regression in the shell/page/theme output
+  (dropping the viewport meta, losing safe-area insets, reintroducing bare
+  100vh, ...) fails `clojure -M:test` before it ships.
+
+  Measured on 2026-07-13 (design-quality @ 36c03d4):
+    worked-example 87.18 / bare-shell 92.18 / dense-console 87.18
+    aggregate 88.84
+  The gap to 100 is upstream liquid-glass-ui, not this repo (recorded as
+  follow-ups in the PR): `:tap-targets` (buttons carry no explicit
+  min-height >= 44px) and `:input-zoom` (a 13px font on the checkbox
+  checkmark pseudo-element `...checkbox-input:checked ~ ...::after` that the
+  heuristic reads as a text-field rule). When those land upstream, re-measure
+  and RAISE these floors — never lower them to make a regression pass."
+  (:require [clojure.test :refer [deftest is testing]]
+            [design-quality.audit :as dq]
+            [kotoba-ui.core :as ui]))
+
+(def aggregate-floor
+  "Measured aggregate (88.84) minus a ~2pt margin."
+  87.0)
+
+(def page-floor
+  "Worst measured page (87.18) minus a ~2pt margin."
+  85.0)
+
+;; --- the representative pages -------------------------------------------------
+
+(defn- feature-card [title body]
+  (ui/panel [[:h3 title] [:p {:class "hig-callout"} body]]))
+
+(defn worked-example-page
+  "docs/agent-guide.md §3 worked example, verbatim shape: hero + card grid +
+  form section + glass nav, dark appearance, custom accent."
+  []
+  (ui/->page {:title "Babiniku" :description "Browser avatar puppeteering."
+              :theme {:accent "#FF3CAC" :appearance :dark}}
+             (ui/app-shell
+              {:nav (ui/nav-bar "Babiniku"
+                                {:leading  [(ui/icon-button "☰" {:act :menu})]
+                                 :trailing [(ui/button "Sign in" {:act :sign-in})]})}
+              (ui/hero {:title   "Become the character"
+                        :tagline "Real-time avatar puppeteering, in the browser."
+                        :actions [(ui/button "Start now" {:act :start})
+                                  (ui/button "Watch demo" {:act :demo})]})
+              (ui/section {:title "Why babiniku" :wide true}
+                          (ui/grid
+                           (feature-card "Zero install" "Camera to character in one tab.")
+                           (feature-card "Your look"    "Accent + appearance from one theme map.")
+                           (feature-card "Private"      "Frames never leave the device.")))
+              (ui/section {:title "Get updates"}
+                          (ui/stack {:gap :3}
+                                    (ui/text-field {:placeholder "you@example.com"
+                                                    :aria-label "Email"})
+                                    (ui/stack {:direction :horizontal :gap :3}
+                                              (ui/spacer)
+                                              (ui/button "Subscribe" {:act :subscribe})))))))
+
+(defn bare-shell-page
+  "The minimum a consumer can ship: default theme, one section — what you
+  get before writing any view code."
+  []
+  (ui/->page {:title "Bare"}
+             (ui/section {:title "Hello"}
+                         [:p "A minimal page: just a section."])))
+
+(defn dense-console-page
+  "Control-dense admin-console shape: toolbar nav, sidebar list, form
+  controls, progress — the desktop-dense end of the spectrum."
+  []
+  (ui/->page {:title "Console" :theme {:appearance :light}}
+             (ui/app-shell
+              {:nav (ui/toolbar [(ui/button "Run" {:act :run})
+                                 (ui/spacer)
+                                 (ui/search-field {:placeholder "Search"
+                                                   :aria-label "Search"})])
+               :sidebar (ui/list-view [(ui/list-row "Jobs")
+                                       (ui/list-row "Fleet")])}
+              (ui/section {:title "Jobs" :wide true}
+                          (ui/stack {:gap :3}
+                                    (ui/text-field {:placeholder "Job name"
+                                                    :aria-label "Job name"})
+                                    (ui/toggle {:checked true})
+                                    (ui/progress-bar 40)
+                                    (ui/stack {:direction :horizontal :gap :3}
+                                              (ui/spacer)
+                                              (ui/button "Save" {:act :save})))))))
+
+(defn sample-pages []
+  {"worked-example" (worked-example-page)
+   "bare-shell"     (bare-shell-page)
+   "dense-console"  (dense-console-page)})
+
+;; --- the gate -------------------------------------------------------------------
+
+(deftest design-quality-gate-test
+  (let [{:keys [overall pages findings]}
+        (dq/audit (sample-pages) {:extra-axes dq/extra-axes})]
+    ;; surface the measured numbers in the test output so CI logs carry them
+    (println (str "design-quality gate — aggregate " overall
+                  " (floor " aggregate-floor ")"))
+    (doseq [[nm rep] pages]
+      (println (str "  " nm " " (:overall rep))))
+    (testing "aggregate stays at/above the measured floor"
+      (is (>= overall aggregate-floor)
+          (str "aggregate " overall " fell below " aggregate-floor
+               " — findings: " (pr-str findings))))
+    (testing "every representative page stays at/above the per-page floor"
+      (doseq [[nm {page-overall :overall :keys [axes]}] pages]
+        (is (>= page-overall page-floor)
+            (str nm " scored " page-overall " (< " page-floor ") — findings: "
+                 (pr-str (filterv :finding axes))))))
+    (testing "only the known upstream axes may carry findings"
+      ;; anything NEW failing here is a kotoba-ui regression, not upstream:
+      ;; fix it (don't add it to this set without an upstream follow-up link)
+      (let [upstream #{:tap-targets :input-zoom}]
+        (is (empty? (remove (comp upstream :axis) findings))
+            (str "new non-upstream findings: "
+                 (pr-str (remove (comp upstream :axis) findings))))))))
