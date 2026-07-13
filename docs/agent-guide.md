@@ -113,7 +113,43 @@ used to take 400+ lines of hand-written CSS:
 and semantic colors, dark appearance, accent-tinted hero wash, glass nav and
 controls, responsive grid — zero app CSS written.
 
-## 4. Do / don't (each "don't" shipped as a real failure)
+## 4. Measure it — an unmeasured page is theater
+
+Building the page is not the last step; **scoring it is** (ADR-2607132300:
+an unmeasured metric is theater — "looks refined to me" is an opinion, the
+audit is a number). [kotoba-lang/design-quality](https://github.com/kotoba-lang/design-quality)
+scores the ACTUAL rendered HTML + inline CSS against a deterministic
+HIG/WCAG/mobile-first rubric (viewport, safe-area, tap targets,
+focus-visible, reduced motion, contrast, ...) — no LLM, no browser.
+
+After you build a page, render it and score it:
+
+```bash
+# in your app: spit the ->page output, then (from a design-quality checkout)
+bb score rendered.html --min 95        # exits 1 below --min — CI-gate ready
+nbb -m design-quality.cli score dist/  # same report on Node
+```
+
+Or as a deftest, the way this repo gates itself
+(`test/kotoba_ui/design_quality_gate_test.cljc` — three representative
+`->page` pages, full 12-axis rubric, floors set from measured scores):
+
+```clojure
+(let [{:keys [overall findings]}
+      (dq/audit {"home" (my-app.page/render-page)} {:extra-axes dq/extra-axes})]
+  (is (>= overall 95) (pr-str findings)))
+```
+
+Pages built purely from this stack currently measure **~87–92**; the gap to
+100 is two known upstream liquid-glass-ui findings (`:tap-targets` — no
+explicit `min-height: 44px` on buttons; `:input-zoom` — a 13px
+checkbox-glyph rule the heuristic reads as a field font), not anything you
+control from app code. Set your app's `--min` from *your* measured score
+minus a small margin, fix the findings the report names before shipping,
+and raise the floor as upstream fixes land — never lower it to make a
+regression pass.
+
+## 5. Do / don't (each "don't" shipped as a real failure)
 
 | Do | Don't |
 |---|---|
@@ -124,7 +160,7 @@ controls, responsive grid — zero app CSS written.
 | Use shell (`grid`/`app-shell`/`stack`) — `min-width: 0` + `overflow-wrap` are built in | Forget `min-width: 0` on grid/flex children (a long URL in `<main>` blew the page width in production) |
 | Dark mode via tokens: `:appearance` + `--hig-*` vars flip everything | Hand-maintain a second palette behind your own `@media (prefers-color-scheme: dark)` |
 
-## 5. Browser mount
+## 6. Browser mount
 
 The same view hiccup mounts live in the browser through shitsuke's reagent
 seam — `shitsuke.reagent.core/render`, with state via
@@ -132,7 +168,7 @@ seam — `shitsuke.reagent.core/render`, with state via
 identical hiccup (the dual-render contract), so a view written for one is
 already written for the other.
 
-## 6. Review checklist
+## 7. Review checklist
 
 - [ ] App requires only `kotoba-ui.core` (+ `appkit.core`/`uikit.core`)
 - [ ] No raw hex / `px` font-size / `font-family` in app code — theme + tokens only
@@ -142,3 +178,7 @@ already written for the other.
 - [ ] Typography only via the 11 `.hig-*` text styles / element defaults
 - [ ] ARIA, `:focus-visible`, reduced-motion intact; ≥ 4.5:1 contrast
 - [ ] Views are pure `.cljc` hiccup, dual-render clean (SSR `->page` + reagent)
+- [ ] **Measured**: rendered output scored with design-quality (`bb score
+      rendered.html --min <your floor>` or the deftest pattern in §4) and the
+      report's findings addressed — an unmeasured page is theater
+      (ADR-2607132300)
