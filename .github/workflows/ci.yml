@@ -41,7 +41,9 @@ jobs:
         run: git clone --depth 1 https://github.com/kotoba-lang/shitsuke ../shitsuke
       - name: Checkout liquid-glass-ui sibling (deps.edn :local/root)
         run: git clone --depth 1 https://github.com/kotoba-lang/liquid-glass-ui ../liquid-glass-ui
-      - name: Run tests
+      - name: Checkout design-quality sibling (deps.edn :test :local/root — self-scoring gate)
+        run: git clone --depth 1 https://github.com/kotoba-lang/design-quality ../design-quality
+      - name: Run tests (includes the design-quality gate)
         run: clojure -M:test
       - name: Lint
         run: clojure -M:lint
