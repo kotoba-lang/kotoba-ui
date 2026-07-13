@@ -12,25 +12,23 @@
   100vh, ...) fails `clojure -M:test` before it ships.
 
   Measured on 2026-07-13 (design-quality @ 36c03d4):
-    worked-example 87.18 / bare-shell 92.18 / dense-console 87.18
-    aggregate 88.84
-  The gap to 100 is upstream liquid-glass-ui, not this repo (recorded as
-  follow-ups in the PR): `:tap-targets` (buttons carry no explicit
-  min-height >= 44px) and `:input-zoom` (a 13px font on the checkbox
-  checkmark pseudo-element `...checkbox-input:checked ~ ...::after` that the
-  heuristic reads as a text-field rule). When those land upstream, re-measure
-  and RAISE these floors — never lower them to make a regression pass."
+    initial: worked-example 87.18 / bare-shell 92.18 / dense-console 87.18
+    (aggregate 88.84); after liquid-glass-ui 17671db landed the two upstream
+    follow-ups (:tap-targets 44px min-height, :input-zoom em checkbox glyph):
+    all three pages 100.0 / aggregate 100.0.
+  Floors raised accordingly. RAISE floors when scores improve — never lower
+  them to make a regression pass."
   (:require [clojure.test :refer [deftest is testing]]
             [design-quality.audit :as dq]
             [kotoba-ui.core :as ui]))
 
 (def aggregate-floor
-  "Measured aggregate (88.84) minus a ~2pt margin."
-  87.0)
+  "Measured aggregate (100.0, liquid-glass-ui >= 17671db) minus a ~2pt margin."
+  98.0)
 
 (def page-floor
-  "Worst measured page (87.18) minus a ~2pt margin."
-  85.0)
+  "Worst measured page (100.0, liquid-glass-ui >= 17671db) minus a ~2pt margin."
+  98.0)
 
 ;; --- the representative pages -------------------------------------------------
 
@@ -118,10 +116,11 @@
         (is (>= page-overall page-floor)
             (str nm " scored " page-overall " (< " page-floor ") — findings: "
                  (pr-str (filterv :finding axes))))))
-    (testing "only the known upstream axes may carry findings"
-      ;; anything NEW failing here is a kotoba-ui regression, not upstream:
-      ;; fix it (don't add it to this set without an upstream follow-up link)
-      (let [upstream #{:tap-targets :input-zoom}]
+    (testing "no axis may carry findings"
+      ;; the former upstream allowlist (:tap-targets :input-zoom) emptied after
+      ;; liquid-glass-ui 17671db fixed both — ANY finding is now a regression;
+      ;; re-add an axis here only with an upstream follow-up link
+      (let [upstream #{}]
         (is (empty? (remove (comp upstream :axis) findings))
             (str "new non-upstream findings: "
                  (pr-str (remove (comp upstream :axis) findings))))))))
