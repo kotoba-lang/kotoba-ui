@@ -115,6 +115,19 @@
    (accent-glass-tokens (dark-accent theme))
    (:glass-dark theme)))
 
+(defn theme-colors
+  "The resolved page background per appearance — the color the browser
+  should paint its own chrome with (`<meta name=theme-color>`; kotoba-ui.
+  shell/page emits the metas from this). Follows the same override chain as
+  `theme-css`: shitsuke.hig's `:system-background` semantic color with the
+  theme's `:hig` / `:hig-dark` escape hatches threaded in.
+  Returns {:light \"#RRGGBB\" :dark \"#RRGGBB\"}."
+  [theme]
+  {:light (get-in (hig/resolve-hig-tokens (hig-overrides theme))
+                  [:hig/color :system-background])
+   :dark  (get-in (hig/resolve-dark-hig-tokens (hig-dark-overrides theme))
+                  [:hig/color :system-background])})
+
 (defn appearance-attr
   "Value for the `data-appearance` attribute on `:root`/[:html]: nil for
   :auto (follow prefers-color-scheme — attribute omitted), \"light\"/\"dark\"

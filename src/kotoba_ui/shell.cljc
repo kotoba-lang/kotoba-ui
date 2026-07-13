@@ -200,7 +200,9 @@
 
 (defn page
   "The full document hiccup: `[:html ...]` with charset/viewport meta,
-  title, optional description meta, the theme's complete CSS bundle
+  title, optional description meta, theme-color metas (browser chrome
+  matches the theme's page background; per-scheme media-gated when the
+  appearance is :auto), the theme's complete CSS bundle
   (kotoba-ui.theme/theme-css) inlined, and `data-appearance` stamped when
   the theme forces an appearance. opts: :title, :description, :lang
   (default \"en\"), :theme (a kotoba-ui.theme map), :head (extra head
@@ -210,14 +212,27 @@
   kotoba-ui.core/->page, which prepends the doctype."
   [opts & body]
   (let [{:keys [title description lang theme head]} opts
-        body-attrs (not-empty (with-root-attrs {} opts))]
+        body-attrs (not-empty (with-root-attrs {} opts))
+        appearance (theme/appearance-attr theme)
+        {:keys [light dark]} (theme/theme-colors theme)]
     [:html {:lang (or lang "en")
-            :data-appearance (theme/appearance-attr theme)}
+            :data-appearance appearance}
      [:head
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, viewport-fit=cover"}]
       [:title (or title "")]
       (when description [:meta {:name "description" :content description}])
+      ;; theme-color: browser chrome (status bar / tab strip) matches the
+      ;; page background. Forced appearance -> one meta; :auto -> one per
+      ;; color scheme, media-gated, so the chrome follows the OS setting.
+      (when (not= appearance "dark")
+        [:meta (cond-> {:name "theme-color" :content light}
+                 (nil? appearance)
+                 (assoc :media "(prefers-color-scheme: light)"))])
+      (when (not= appearance "light")
+        [:meta (cond-> {:name "theme-color" :content dark}
+                 (nil? appearance)
+                 (assoc :media "(prefers-color-scheme: dark)"))])
       [:style [:hiccup/raw (theme/theme-css theme)]]
       head]
      (into (if body-attrs [:body body-attrs] [:body]) body)]))

@@ -85,3 +85,13 @@ not duplicate it, only re-exports it.
 clojure -M:test            # published git shitsuke + liquid-glass-ui deps
 clojure -M:local:test      # local ../shitsuke + ../liquid-glass-ui overrides
 ```
+
+`:test` includes a **design-quality self-scoring gate**
+(`test/kotoba_ui/design_quality_gate_test.cljc`): representative pages are
+rendered with `->page` and scored against
+[kotoba-lang/design-quality](https://github.com/kotoba-lang/design-quality)'s
+deterministic HIG/WCAG audit (ADR-2607132300 — an unmeasured metric is
+theater); the suite fails if the output regresses below the measured floor.
+It needs a `../design-quality` sibling checkout (CI clones it alongside
+shitsuke / liquid-glass-ui). See `docs/agent-guide.md` §4 for scoring your
+own app's pages.
