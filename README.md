@@ -14,6 +14,10 @@ On top of the aliases, `kotoba-ui` owns the two layers the stack was missing
 - **`kotoba-ui.shell`** — pure-hiccup HIG layout scaffolds (`app-shell`,
   `hero`, `section`, `grid`, `stack`, `spacer`, `page`) whose structural CSS
   lives inside `@layer kotoba.hig` and references only `--hig-*` tokens.
+  Every scaffold's opts map also accepts `:id` / `:class` (string or
+  vector, merged with the shell class) / `:attrs` (any other attribute
+  map: data-*, aria-*, role, ...) on its root element — pass these instead
+  of mirroring shell CSS in app CSS when you need a JS/CSS hook.
 - **`kotoba-ui.theme`** — one theme map (`{:accent "#RRGGBB"
   :appearance :auto|:light|:dark ...}`) as the *only* styling entry;
   `theme-css` emits the complete page CSS (HIG + glass + shell, cascade
