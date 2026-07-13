@@ -215,7 +215,7 @@
             :data-appearance (theme/appearance-attr theme)}
      [:head
       [:meta {:charset "utf-8"}]
-      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+      [:meta {:name "viewport" :content "width=device-width, initial-scale=1, viewport-fit=cover"}]
       [:title (or title "")]
       (when description [:meta {:name "description" :content description}])
       [:style [:hiccup/raw (theme/theme-css theme)]]
