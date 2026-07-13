@@ -105,8 +105,19 @@
    [".kotoba-shell__grid > *" {:min-width "0"}]
 
    ;; --- app-shell: sticky nav + optional sidebar + main --------------------
+   ;; Safe-area insets (HIG: content never sits under the notch / home
+   ;; indicator): left/right cover landscape notches, bottom covers the home
+   ;; indicator; all resolve to 0px on devices without insets. The top edge
+   ;; belongs to the glass nav material (liquid-glass nav-bar), not the shell.
    [".kotoba-shell__app"
-    {:min-height "100vh" :display "flex" :flex-direction "column"}]
+    {:min-height "100vh" :display "flex" :flex-direction "column"
+     :padding-left "env(safe-area-inset-left, 0px)"
+     :padding-right "env(safe-area-inset-right, 0px)"
+     :padding-bottom "env(safe-area-inset-bottom, 0px)"}]
+   ;; Dynamic-viewport progressive enhancement: bare 100vh overshoots under
+   ;; mobile browser chrome (the URL bar); browsers that know dvh use it,
+   ;; older ones keep the 100vh fallback above.
+   [".kotoba-shell__app" {:min-height "100dvh"}]
    [".kotoba-shell__app-nav" {:position "sticky" :top "0" :z-index "10"}]
    [".kotoba-shell__app-body"
     {:flex "1" :display "grid" :grid-template-columns "minmax(0, 1fr)"

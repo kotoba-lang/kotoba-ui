@@ -107,6 +107,26 @@
     (let [html (hiccup/->html (shell/page {:title "T" :lang "ja"} [:p "b"]))]
       (is (str/starts-with? html "<html lang=\"ja\"><head>")))))
 
+(deftest page-theme-color-test
+  (testing ":auto -> two media-gated theme-color metas (browser chrome follows the OS)"
+    (let [html (hiccup/->html (shell/page {:title "T"} [:p "b"]))]
+      (is (str/includes? html (str "<meta name=\"theme-color\" content=\"#FFFFFF\""
+                                   " media=\"(prefers-color-scheme: light)\">")))
+      (is (str/includes? html (str "<meta name=\"theme-color\" content=\"#000000\""
+                                   " media=\"(prefers-color-scheme: dark)\">")))))
+  (testing "forced appearance -> a single un-gated meta for that scheme"
+    (let [html (hiccup/->html (shell/page {:title "T" :theme {:appearance :dark}} [:p "b"]))]
+      (is (str/includes? html "<meta name=\"theme-color\" content=\"#000000\">"))
+      (is (not (str/includes? html "prefers-color-scheme: light)\">"))))
+    (let [html (hiccup/->html (shell/page {:title "T" :theme {:appearance :light}} [:p "b"]))]
+      (is (str/includes? html "<meta name=\"theme-color\" content=\"#FFFFFF\">"))
+      (is (not (str/includes? html "media=\"(prefers-color-scheme")))))
+  (testing "the :hig escape hatch re-colors the meta (same chain as theme-css)"
+    (let [html (hiccup/->html (shell/page {:title "T"
+                                           :theme {:hig {:hig/color {:system-background "#101418"}}}}
+                                          [:p "b"]))]
+      (is (str/includes? html "content=\"#101418\" media=\"(prefers-color-scheme: light)\"")))))
+
 (deftest root-attrs-passthrough-test
   (testing ":id lands on the root element"
     (is (str/starts-with? (hiccup/->html (shell/grid {:id "business-grid"} [:div "c"]))
@@ -195,4 +215,13 @@
       (is (str/includes? css ".kotoba-shell__app-main { min-width: 0; overflow-wrap: break-word; }"))
       (is (str/includes? css ".kotoba-shell__grid > * { min-width: 0; }")))
     (testing "responsive sidebar collapse"
-      (is (str/includes? css "@media (max-width: 768px)")))))
+      (is (str/includes? css "@media (max-width: 768px)")))
+    (testing "dynamic viewport: 100dvh enhancement after the 100vh fallback"
+      (is (str/includes? css "min-height: 100vh"))
+      (is (str/includes? css "min-height: 100dvh"))
+      (is (< (str/index-of css "min-height: 100vh")
+             (str/index-of css "min-height: 100dvh"))))
+    (testing "safe-area insets on the app frame (left/right/bottom)"
+      (is (str/includes? css "env(safe-area-inset-left, 0px)"))
+      (is (str/includes? css "env(safe-area-inset-right, 0px)"))
+      (is (str/includes? css "env(safe-area-inset-bottom, 0px)")))))
