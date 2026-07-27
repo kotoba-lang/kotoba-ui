@@ -11,7 +11,7 @@
         io.github.kotoba-lang/liquid-glass-ui {:local/root "../liquid-glass-ui"}
         io.github.kotoba-lang/css
         {:git/url "https://github.com/kotoba-lang/css.git"
-         :git/sha "e8bb830b69aa1a726bb79dbd28f098f0875db673"}}
+         :git/sha "fd5b15dc8a213c852fe822a24766fc5a18ba1443"}}
  :aliases
  {;; :test also carries the design-quality self-scoring gate
   ;; (test/kotoba_ui/design_quality_gate_test.cljc): the deterministic
