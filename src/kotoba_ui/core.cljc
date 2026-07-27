@@ -21,7 +21,8 @@
             [liquid-glass.style :as style]
             [liquid-glass.components :as glass]
             [kotoba-ui.theme :as theme]
-            [kotoba-ui.shell :as shell]))
+            [kotoba-ui.shell :as shell]
+            [kotoba-ui.shell.style :as shell-style]))
 
 ;; -- hiccup (shitsuke.hiccup) -------------------------------------------------
 
@@ -112,6 +113,25 @@
 (def app-shell shell/app-shell)
 (def page shell/page)
 (def shell-css shell/shell-css)
+
+;; -- responsive constants -----------------------------------------------------
+;; An app whose own CSS reacts to the app-shell's layout needs the SAME
+;; numbers the shell switches on, or it invents a second breakpoint beside the
+;; design system's and the two disagree in the band between them. That shipped:
+;; a console un-stuck its sticky sidebar at 900px while the shell keeps the
+;; two-column layout down to 768px, so between 769px and 900px the sidebar was
+;; a 260px column that scrolled away instead of staying pinned. Exported here
+;; rather than left for apps to hardcode.
+
+(def sidebar-breakpoint
+  "Viewport width at (and under) which `app-shell`'s sidebar collapses to a
+  single column. Use this in an app's own media queries so they switch in
+  lockstep with the shell (`(str \"(max-width: \" ui/sidebar-breakpoint \")\")`)."
+  shell-style/sidebar-breakpoint)
+
+(def sidebar-width
+  "Fixed sidebar column width in the two-column app-shell layout."
+  shell-style/sidebar-width)
 
 (defn ->page
   "The one-call SSR entry: a complete refined HTML document string —
