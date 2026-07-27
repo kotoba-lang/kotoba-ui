@@ -3,6 +3,15 @@
 - **Status**: accepted — scaffolded (2026-07-02)
 - **Date**: 2026-07-02
 - **Deciders**: Jun Kawasaki
+
+## Addendum — `.kotoba` form-A string pipeline (2026-07-27)
+
+Per ADR-2607270100 §10 / ADR-2607279200 Delivery #6, `kotoba/theme_core.kotoba`
+ports the pure composition-layer string core (`hex->rgba`, accent decls,
+layer-order, shell class/layout constants). Full `theme-css` still joins
+shitsuke + liquid-glass + shell on the host `.cljc` side. Consumer APIs are
+unchanged. Byte-equality is gated by `test/kotoba_ui/kotoba_parity_test.clj`.
+Oracle-backed experiment ahead of W4; not the final composition API.
 - **Context tags**: ui, design-system, cljc, shitsuke, liquid-glass-ui
 - **Related**: `90-docs/adr/2607022800-kotoba-lang-default-uiux-appkit-uikit-interface-fundamentals.md`
   (superproject decision), `90-docs/adr/2607011900-kotoba-lang-liquid-glass-ui.md`,
