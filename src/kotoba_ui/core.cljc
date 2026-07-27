@@ -21,7 +21,8 @@
             [liquid-glass.style :as style]
             [liquid-glass.components :as glass]
             [kotoba-ui.theme :as theme]
-            [kotoba-ui.shell :as shell]))
+            [kotoba-ui.shell :as shell]
+            [kotoba-ui.product :as product]))
 
 ;; -- hiccup (shitsuke.hiccup) -------------------------------------------------
 
@@ -88,6 +89,12 @@
 (def divider glass/divider)
 (def tooltip glass/tooltip)
 (def lens-filter-defs glass/lens-filter-defs)
+
+;; -- product surfaces ---------------------------------------------------------
+
+(def metric product/metric)
+(def empty-state product/empty-state)
+(def data-table product/data-table)
 
 ;; -- theme (kotoba-ui.theme) ----------------------------------------------------
 ;; One theme map — {:accent "#RRGGBB" :appearance :auto|:light|:dark ...} —
