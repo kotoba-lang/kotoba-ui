@@ -79,6 +79,16 @@ repo's docs (and, downstream, `appkit`/`uikit`) are organized around, and
 API detail lives in `liquid-glass-ui/docs/design.md` — `kotoba-ui.core` does
 not duplicate it, only re-exports it.
 
+## `.kotoba` form-A port (ADR-2607270100 §10)
+
+`kotoba/theme_core.kotoba` ports the pure string core this composition layer
+owns: `hex->rgba` (accent → glass rgba), accent CSS-var declaration lines,
+cascade layer-order/wrap, shell class-name and layout constants. Full
+`theme-css` composition (joining shitsuke + liquid-glass + shell host
+outputs) stays on the `.cljc` side. Consumer APIs are unchanged — oracle-backed
+experiment ahead of W4, not the final API. Byte-equality is gated by
+`test/kotoba_ui/kotoba_parity_test.clj` (compiler is test-only).
+
 ## Tests
 
 ```bash
