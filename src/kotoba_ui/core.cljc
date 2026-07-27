@@ -22,7 +22,8 @@
             [liquid-glass.components :as glass]
             [kotoba-ui.theme :as theme]
             [kotoba-ui.shell :as shell]
-            [kotoba-ui.shell.style :as shell-style]))
+            [kotoba-ui.shell.style :as shell-style]
+            [kotoba-ui.product :as product]))
 
 ;; -- hiccup (shitsuke.hiccup) -------------------------------------------------
 
@@ -113,6 +114,18 @@
 (def app-shell shell/app-shell)
 (def page shell/page)
 (def shell-css shell/shell-css)
+
+;; -- product surfaces (kotoba-ui.product) -------------------------------------
+;; `kotoba_ui/product.cljc` shipped WITHOUT these aliases, so the ns existed on
+;; main but nothing could reach it under rule 1 (apps require kotoba-ui.core
+;; only). Consumers either reached around core to require kotoba-ui.product
+;; directly — the opt-out rule 1 exists to prevent — or, as actually happened,
+;; built green against a west checkout carrying an uncommitted local alias and
+;; would have failed from a clean clone at the pinned SHA.
+
+(def metric product/metric)
+(def empty-state product/empty-state)
+(def data-table product/data-table)
 
 ;; -- responsive constants -----------------------------------------------------
 ;; An app whose own CSS reacts to the app-shell's layout needs the SAME
