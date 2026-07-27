@@ -1,41 +1,29 @@
 {:paths ["src"]
- ;; Composition layer: kotoba-ui.core requires shitsuke (structure/dual-render
- ;; contract) + liquid-glass-ui (material skin) and re-exports their public API as a
- ;; single require point, plus kotoba-ui's own shell (HIG layout scaffolds) and
- ;; theme (one-map styling entry) namespaces — see docs/adr/0001-kotoba-ui.md and
- ;; docs/agent-guide.md. kotoba-lang/css is required directly by kotoba-ui.shell.style
- ;; (shell rules are EDN data via css.core, same :git/sha as liquid-glass-ui's dep).
- ;; Not to be confused with the pre-existing orgs/kotoba-lang/ui repo (package
- ;; kotoba.ui), which is kami-engine's unrelated WebGPU HUD overlay renderer.
- :deps {io.github.kotoba-lang/shitsuke {:local/root "../shitsuke"}
-        io.github.kotoba-lang/liquid-glass-ui {:local/root "../liquid-glass-ui"}
+ ;; Composition layer: kotoba-ui.core requires shitsuke + liquid-glass-ui and
+ ;; re-exports their public API, plus shell/theme. css is required by shell.style.
+ :deps {io.github.kotoba-lang/shitsuke
+        {:git/url "https://github.com/kotoba-lang/shitsuke.git"
+         :git/sha "8820801bbf52d47a31be9521a193f9bc5359a39e"}
+        io.github.kotoba-lang/liquid-glass-ui
+        {:git/url "https://github.com/kotoba-lang/liquid-glass-ui.git"
+         :git/sha "8bb2c4fa10c06e638e38e55bff1b7f36830f2766"}
         io.github.kotoba-lang/css
         {:git/url "https://github.com/kotoba-lang/css.git"
-         :git/sha "fd5b15dc8a213c852fe822a24766fc5a18ba1443"}}
+         :git/sha "4654260a9b06e3c98bd6e02c877612c0a1f2d7a9"}}
  :aliases
- {;; :test also carries the design-quality self-scoring gate
-  ;; (test/kotoba_ui/design_quality_gate_test.cljc): the deterministic
-  ;; HIG/WCAG audit scores pages rendered by ->page. Test-time only — the
-  ;; library has no runtime dep on it. Sibling checkout, like shitsuke /
-  ;; liquid-glass-ui (CI clones it the same way).
-  :test {:extra-paths ["test"]
-         ;; kotoba-lang/compiler is TEST-ONLY, for the form-A parity gate that
-         ;; compiles kotoba/theme_core.kotoba and requires byte-identical
-         ;; hex->rgba / accent / layer / shell strings to kotoba-ui.theme
-         ;; (ADR-2607270100 §10, final step). Library has no runtime dep on it.
+ {:test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
                       {:git/tag "v0.5.1" :git/sha "dfb30dd"}
                       io.github.kotoba-lang/design-quality
                       {:local/root "../design-quality"}
                       io.github.kotoba-lang/compiler
                       {:git/url "https://github.com/kotoba-lang/compiler.git"
-                       :git/sha "892d3ddb84e4c7b4f824276a0c24ffd46bf7b89c"}}
+                       :git/sha "aef2daac9fed70b4bbcedf23af630f19ac10b7d2"}}
          :main-opts ["-m" "cognitect.test-runner"]
          :exec-fn cognitect.test-runner.api/test}
   :local {:override-deps {io.github.kotoba-lang/shitsuke {:local/root "../shitsuke"}
                           io.github.kotoba-lang/liquid-glass-ui {:local/root "../liquid-glass-ui"}
                           io.github.kotoba-lang/css {:local/root "../css"}}}
-  ;; clj-kondo as a Clojars lib (no Homebrew/system install needed).
   :lint {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2024.11.14"}}
          :main-opts ["-m" "clj-kondo.main" "--lint" "src" "test"
                      "--fail-level" "error"]}}}

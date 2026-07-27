@@ -1,0 +1,141 @@
+(ns kotoba-ui.kotoba-document-parity-test
+  "Delivery 6 fifth (final) cutover for kotoba-ui composition layer:
+
+  Logical theme `:document` (`:accent` hex, optional `:appearance`) renders
+  to cascade header + accent CSS-var lines that are byte-identical to form-A
+  theme_core.hex→rgba / accent-decls / layer / shell helpers.
+
+  Full theme-css host join remains .cljc. Form-A remains oracle; consumer
+  APIs unchanged. Completes css → html → shitsuke → liquid-glass-ui → kotoba-ui."
+  (:require [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
+            [kotoba.compiler.core :as compiler]
+            [kotoba.kir :as ir]
+            [kotoba.kir.value :as value]
+            [kotoba-ui.shell.style :as shell]
+            [kotoba-ui.theme :as theme]
+            [shitsuke.hig :as hig]))
+
+(def form-a-source (slurp "kotoba/theme_core.kotoba"))
+(def document-source (slurp "kotoba/theme_document.kotoba"))
+(def ^:private fuel 65536)
+
+(defn- kotoba-literal [s]
+  (str \" (-> s (str/replace "\\" "\\\\") (str/replace "\"" "\\\"")) \"))
+
+(defn- compile-and-run [port-source cases]
+  (let [defs (for [[name body] cases]
+               (str "(defn " name " [] :string " body ")"))
+        kir (:kir (compiler/compile-source
+                   (str port-source "\n" (str/join "\n" defs))
+                   :js-kotoba-v1))]
+    (into {} (map (fn [[name _]]
+                    [name (ir/execute kir (symbol name) [] {:fuel fuel})])
+                  cases))))
+
+(deftest document-hex-and-accent-match-form-a
+  (let [hex "#FF3CAC"
+        form-a (compile-and-run
+                form-a-source
+                {"pink" "(hex->rgba \"#FF3CAC\" \"0.55\")"
+                 "blue" "(hex->rgba \"0A84FF\" \"0.85\")"
+                 "white3" "(hex->rgba \"#fff\" \"1\")"
+                 "tint" "(accent-tint \"#FF3CAC\")"
+                 "strong" "(accent-tint-strong \"#FF3CAC\")"
+                 "hig" (str "(hig-tint-decl " (kotoba-literal hex) ")")
+                 "gt" (str "(glass-accent-tint-decl " (kotoba-literal hex) ")")
+                 "gs" (str "(glass-accent-strong-decl " (kotoba-literal hex) ")")
+                 "all" (str "(accent-decls " (kotoba-literal hex) ")")
+                 "header" (str "(theme-header (accent-decls " (kotoba-literal hex) "))")})
+        docs (compile-and-run
+              document-source
+              {"pink" "(hex->rgba \"#FF3CAC\" \"0.55\")"
+               "blue" "(hex->rgba \"0A84FF\" \"0.85\")"
+               "white3" "(hex->rgba \"#fff\" \"1\")"
+               "tint" "(accent-tint \"#FF3CAC\")"
+               "strong" "(accent-tint-strong \"#FF3CAC\")"
+               "hig" (str "(hig-tint-decl " (kotoba-literal hex) ")")
+               "gt" (str "(glass-accent-tint-decl " (kotoba-literal hex) ")")
+               "gs" (str "(glass-accent-strong-decl " (kotoba-literal hex) ")")
+               "all" (str "(render-accent-decls (theme-doc " (kotoba-literal hex) "))")
+               "header" (str "(render-theme-header (theme-doc " (kotoba-literal hex) "))")})]
+    (testing "hex→rgba"
+      (doseq [k ["pink" "blue" "white3" "tint" "strong"]]
+        (is (= (get form-a k) (get docs k)))))
+    (testing "accent decls via document"
+      (is (= (get form-a "hig") (get docs "hig")))
+      (is (= (get form-a "gt") (get docs "gt")))
+      (is (= (get form-a "gs") (get docs "gs")))
+      (is (= (get form-a "all") (get docs "all")))
+      (is (= (get form-a "header") (get docs "header"))))
+    (testing "theme-css still includes the same accent lines"
+      (let [css (theme/theme-css {:accent hex})]
+        (is (str/includes? css (str/trim (get docs "hig"))))
+        (is (str/includes? css (str/trim (get docs "gt"))))
+        (is (str/includes? css (str/trim (get docs "gs"))))))))
+
+(deftest document-layer-and-shell-match-form-a
+  (let [form-a (compile-and-run
+                form-a-source
+                {"order" "(layer-order-css)"
+                 "wrap" "(layer-wrap \"kotoba.hig\" \"  --x: 1;\")"
+                 "hero" "(shell-class \"hero\")"
+                 "app" "(shell-class \"app--with-sidebar\")"
+                 "rmw" "(readable-max-width)"
+                 "gmw" "(grid-min-width)"
+                 "sw" "(sidebar-width)"
+                 "sbp" "(sidebar-breakpoint)"
+                 "al" "(appearance-value \"light\")"
+                 "ad" "(appearance-value \"dark\")"
+                 "aa" "(appearance-value \"auto\")"})
+        docs (compile-and-run
+              document-source
+              {"order" "(layer-order-css)"
+               "wrap" "(layer-wrap \"kotoba.hig\" \"  --x: 1;\")"
+               "hero" "(shell-class \"hero\")"
+               "app" "(shell-class \"app--with-sidebar\")"
+               "rmw" "(readable-max-width)"
+               "gmw" "(grid-min-width)"
+               "sw" "(sidebar-width)"
+               "sbp" "(sidebar-breakpoint)"
+               "al" "(appearance-value \"light\")"
+               "ad" "(appearance-value \"dark\")"
+               "aa" "(appearance-value \"auto\")"
+               "al-doc" "(render-appearance (theme-doc-appearance \"#fff\" \"light\"))"
+               "ad-doc" "(render-appearance (theme-doc-appearance \"#fff\" \"dark\"))"
+               "aa-doc" "(render-appearance (theme-doc-appearance \"#fff\" \"auto\"))"})]
+    (is (= hig/layer-order-css (get form-a "order") (get docs "order")))
+    (is (= (get form-a "wrap") (get docs "wrap")))
+    (is (= (shell/class-name :hero) (get form-a "hero") (get docs "hero")))
+    (is (= (shell/class-name "app--with-sidebar") (get form-a "app") (get docs "app")))
+    (is (= shell/readable-max-width (get form-a "rmw") (get docs "rmw")))
+    (is (= shell/grid-min-width (get form-a "gmw") (get docs "gmw")))
+    (is (= shell/sidebar-width (get form-a "sw") (get docs "sw")))
+    (is (= shell/sidebar-breakpoint (get form-a "sbp") (get docs "sbp")))
+    (is (= "light" (get form-a "al") (get docs "al") (get docs "al-doc")))
+    (is (= "dark" (get form-a "ad") (get docs "ad") (get docs "ad-doc")))
+    (is (= "" (get form-a "aa") (get docs "aa") (get docs "aa-doc")))))
+
+(deftest theme-document-identity
+  (let [source (str document-source "\n"
+                    "(defn t [] :document (theme-doc \"#FF3CAC\"))\n"
+                    "(defn t-css [] :string (render-theme-header (t)))\n"
+                    "(defn t-dig [] :string (theme-digest (t)))\n"
+                    "(defn t-print [] :string (theme-print (t)))\n"
+                    "(defn round-ok [] :bool\n"
+                    "  (document-equal? (t) (theme-read (theme-print (t)))))\n"
+                    "(defn dig-stable [] :i64\n"
+                    "  (if (string=? (theme-digest (t))\n"
+                    "               (theme-digest (theme-read (theme-print (t))))) 1 0))\n")
+        kir (:kir (compiler/compile-source source :js-kotoba-v1))
+        run (fn [sym] (ir/execute kir sym [] {:fuel fuel}))
+        dig (run 't-dig)
+        printed (run 't-print)
+        css (run 't-css)]
+    (is (str/includes? css "--hig-color-tint: #FF3CAC;"))
+    (is (str/includes? css "--liquid-glass-accent-tint: rgba(255,60,172,0.55);"))
+    (is (str/starts-with? css (str hig/layer-order-css "\n@layer kotoba.hig {")))
+    (is (or (true? (run 'round-ok)) (= 1 (run 'round-ok)) (= 1N (run 'round-ok))))
+    (is (= 1 (run 'dig-stable)))
+    (is (re-matches #"[0-9a-f]{64}" dig))
+    (is (= dig (value/document-sha256-hex (value/document-read printed))))))
