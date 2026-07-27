@@ -26,6 +26,7 @@
             [liquid-glass.tokens :as glass-tokens]
             [liquid-glass.style :as glass-style]
             [kotoba-ui.shell.style :as shell-style]
+            [kotoba-ui.product :as product]
             [clojure.string :as str]))
 
 ;; ---------------------------------------------------------------------------
@@ -179,4 +180,10 @@
           (hig/base-css ho) "\n"
           hig/text-style-classes "\n"
           glass "\n"
-          (shell-style/shell-css)))))
+          ;; kotoba-ui.product's own rules. Without them the product
+          ;; surfaces render as unstyled markup — `empty-state` becomes a
+          ;; bare <h3>+<p>, `data-table` loses its scroll container — which
+          ;; is what shipped while `product.cljc` was on main but nothing
+          ;; pulled its CSS into the bundle.
+          (shell-style/shell-css) "\n"
+          product/product-css))))
