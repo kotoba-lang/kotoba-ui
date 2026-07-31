@@ -9,7 +9,9 @@
   gated is the pure logic this composition layer owns: hex->rgba, accent
   declaration lines, layer-order/wrap, shell class-name and layout constants.
 
-  Compiled and executed through the KIR interpreter in this same JVM."
+  Compiled and executed through the KIR interpreter in this same JVM.
+
+  T5.2: multi-arg pure folded into guest records; cases call via record-new."
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
@@ -31,13 +33,21 @@
                    (str port-source "\n" (str/join "\n" defs)) :wasm32-kotoba-v1 {}))]
     (into {} (map (fn [[name _]] [name (ir/execute kir (symbol name) [])]) cases))))
 
+(defn- ui-hex-rgba [hex alpha]
+  (str "(hex->rgba (record-new [:ref :ui/hex-rgba] "
+       (kotoba-literal hex) " " (kotoba-literal alpha) "))"))
+
+(defn- ui-layer-wrap [layer body]
+  (str "(layer-wrap (record-new [:ref :ui/layer-wrap] "
+       (kotoba-literal layer) " " (kotoba-literal body) "))"))
+
 ;; --- hex->rgba ------------------------------------------------------------
 
 (deftest hex-to-rgba-is-byte-identical
-  (let [cases {"pink" "(hex->rgba \"#FF3CAC\" \"0.55\")"
-               "blue" "(hex->rgba \"0A84FF\" \"0.85\")"
-               "white3" "(hex->rgba \"#fff\" \"1\")"
-               "black3" "(hex->rgba \"000\" \"0.5\")"
+  (let [cases {"pink" (ui-hex-rgba "#FF3CAC" "0.55")
+               "blue" (ui-hex-rgba "0A84FF" "0.85")
+               "white3" (ui-hex-rgba "#fff" "1")
+               "black3" (ui-hex-rgba "000" "0.5")
                "tint" "(accent-tint \"#FF3CAC\")"
                "strong" "(accent-tint-strong \"#FF3CAC\")"}
         actual (compile-cases cases)]
@@ -78,7 +88,7 @@
 (deftest layer-order-and-wrap-match
   (let [actual (compile-cases
                 {"order" "(layer-order-css)"
-                 "wrap" "(layer-wrap \"kotoba.hig\" \"  --x: 1;\")"
+                 "wrap" (ui-layer-wrap "kotoba.hig" "  --x: 1;")
                  "header" "(theme-header (accent-decls \"#FF3CAC\"))"})]
     (is (= hig/layer-order-css (get actual "order")))
     (is (= "@layer kotoba.hig {\n  --x: 1;\n}" (get actual "wrap")))

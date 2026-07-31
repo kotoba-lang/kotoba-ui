@@ -6,7 +6,11 @@
   theme_core.hex→rgba / accent-decls / layer / shell helpers.
 
   Full theme-css host join remains .cljc. Form-A remains oracle; consumer
-  APIs unchanged. Completes css → html → shitsuke → liquid-glass-ui → kotoba-ui."
+  APIs unchanged. Completes css → html → shitsuke → liquid-glass-ui → kotoba-ui.
+
+  T5.2: form-A multi-arg pure folded into guest records; form-A cases use
+  record-new. Document plane multi-arg stays multi-arg (document-in-record
+  closed profile still open)."
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
@@ -23,6 +27,14 @@
 (defn- kotoba-literal [s]
   (str \" (-> s (str/replace "\\" "\\\\") (str/replace "\"" "\\\"")) \"))
 
+(defn- ui-hex-rgba [hex alpha]
+  (str "(hex->rgba (record-new [:ref :ui/hex-rgba] "
+       (kotoba-literal hex) " " (kotoba-literal alpha) "))"))
+
+(defn- ui-layer-wrap [layer body]
+  (str "(layer-wrap (record-new [:ref :ui/layer-wrap] "
+       (kotoba-literal layer) " " (kotoba-literal body) "))"))
+
 (defn- compile-and-run [port-source cases]
   (let [defs (for [[name body] cases]
                (str "(defn " name " [] :string " body ")"))
@@ -37,9 +49,9 @@
   (let [hex "#FF3CAC"
         form-a (compile-and-run
                 form-a-source
-                {"pink" "(hex->rgba \"#FF3CAC\" \"0.55\")"
-                 "blue" "(hex->rgba \"0A84FF\" \"0.85\")"
-                 "white3" "(hex->rgba \"#fff\" \"1\")"
+                {"pink" (ui-hex-rgba "#FF3CAC" "0.55")
+                 "blue" (ui-hex-rgba "0A84FF" "0.85")
+                 "white3" (ui-hex-rgba "#fff" "1")
                  "tint" "(accent-tint \"#FF3CAC\")"
                  "strong" "(accent-tint-strong \"#FF3CAC\")"
                  "hig" (str "(hig-tint-decl " (kotoba-literal hex) ")")
@@ -78,7 +90,7 @@
   (let [form-a (compile-and-run
                 form-a-source
                 {"order" "(layer-order-css)"
-                 "wrap" "(layer-wrap \"kotoba.hig\" \"  --x: 1;\")"
+                 "wrap" (ui-layer-wrap "kotoba.hig" "  --x: 1;")
                  "hero" "(shell-class \"hero\")"
                  "app" "(shell-class \"app--with-sidebar\")"
                  "rmw" "(readable-max-width)"
