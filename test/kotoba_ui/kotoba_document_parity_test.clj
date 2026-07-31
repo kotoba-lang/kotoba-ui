@@ -8,9 +8,8 @@
   Full theme-css host join remains .cljc. Form-A remains oracle; consumer
   APIs unchanged. Completes css → html → shitsuke → liquid-glass-ui → kotoba-ui.
 
-  T5.2: form-A multi-arg pure folded into guest records; form-A cases use
-  record-new. Document plane multi-arg stays multi-arg (document-in-record
-  closed profile still open)."
+  T5.2 + document-in-record: form-A and document-plane multi-arg pure fold
+  into guest records (`:ui/*`, `:uidoc/*`)."
   (:require [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
@@ -31,9 +30,24 @@
   (str "(hex->rgba (record-new [:ref :ui/hex-rgba] "
        (kotoba-literal hex) " " (kotoba-literal alpha) "))"))
 
+(defn- uidoc-hex-rgba [hex alpha]
+  (str "(hex->rgba (record-new [:ref :uidoc/hex-rgba] "
+       (kotoba-literal hex) " " (kotoba-literal alpha) "))"))
+
 (defn- ui-layer-wrap [layer body]
   (str "(layer-wrap (record-new [:ref :ui/layer-wrap] "
        (kotoba-literal layer) " " (kotoba-literal body) "))"))
+
+(defn- uidoc-layer-wrap [layer body]
+  (str "(layer-wrap (record-new [:ref :uidoc/layer-wrap] "
+       (kotoba-literal layer) " " (kotoba-literal body) "))"))
+
+(defn- uidoc-theme [hex]
+  (str "(theme-doc (record-new [:ref :uidoc/theme] " (kotoba-literal hex) "))"))
+
+(defn- uidoc-theme-appearance [hex appearance]
+  (str "(theme-doc-appearance (record-new [:ref :uidoc/theme-appearance] "
+       (kotoba-literal hex) " " (kotoba-literal appearance) "))"))
 
 (defn- compile-and-run [port-source cases]
   (let [defs (for [[name body] cases]
@@ -61,16 +75,16 @@
                  "header" (str "(theme-header (accent-decls " (kotoba-literal hex) "))")})
         docs (compile-and-run
               document-source
-              {"pink" "(hex->rgba \"#FF3CAC\" \"0.55\")"
-               "blue" "(hex->rgba \"0A84FF\" \"0.85\")"
-               "white3" "(hex->rgba \"#fff\" \"1\")"
+              {"pink" (uidoc-hex-rgba "#FF3CAC" "0.55")
+               "blue" (uidoc-hex-rgba "0A84FF" "0.85")
+               "white3" (uidoc-hex-rgba "#fff" "1")
                "tint" "(accent-tint \"#FF3CAC\")"
                "strong" "(accent-tint-strong \"#FF3CAC\")"
                "hig" (str "(hig-tint-decl " (kotoba-literal hex) ")")
                "gt" (str "(glass-accent-tint-decl " (kotoba-literal hex) ")")
                "gs" (str "(glass-accent-strong-decl " (kotoba-literal hex) ")")
-               "all" (str "(render-accent-decls (theme-doc " (kotoba-literal hex) "))")
-               "header" (str "(render-theme-header (theme-doc " (kotoba-literal hex) "))")})]
+               "all" (str "(render-accent-decls " (uidoc-theme hex) ")")
+               "header" (str "(render-theme-header " (uidoc-theme hex) ")")})]
     (testing "hex→rgba"
       (doseq [k ["pink" "blue" "white3" "tint" "strong"]]
         (is (= (get form-a k) (get docs k)))))
@@ -103,7 +117,7 @@
         docs (compile-and-run
               document-source
               {"order" "(layer-order-css)"
-               "wrap" "(layer-wrap \"kotoba.hig\" \"  --x: 1;\")"
+               "wrap" (uidoc-layer-wrap "kotoba.hig" "  --x: 1;")
                "hero" "(shell-class \"hero\")"
                "app" "(shell-class \"app--with-sidebar\")"
                "rmw" "(readable-max-width)"
@@ -113,9 +127,9 @@
                "al" "(appearance-value \"light\")"
                "ad" "(appearance-value \"dark\")"
                "aa" "(appearance-value \"auto\")"
-               "al-doc" "(render-appearance (theme-doc-appearance \"#fff\" \"light\"))"
-               "ad-doc" "(render-appearance (theme-doc-appearance \"#fff\" \"dark\"))"
-               "aa-doc" "(render-appearance (theme-doc-appearance \"#fff\" \"auto\"))"})]
+               "al-doc" (str "(render-appearance " (uidoc-theme-appearance "#fff" "light") ")")
+               "ad-doc" (str "(render-appearance " (uidoc-theme-appearance "#fff" "dark") ")")
+               "aa-doc" (str "(render-appearance " (uidoc-theme-appearance "#fff" "auto") ")")})]
     (is (= hig/layer-order-css (get form-a "order") (get docs "order")))
     (is (= (get form-a "wrap") (get docs "wrap")))
     (is (= (shell/class-name :hero) (get form-a "hero") (get docs "hero")))
@@ -130,7 +144,7 @@
 
 (deftest theme-document-identity
   (let [source (str document-source "\n"
-                    "(defn t [] :document (theme-doc \"#FF3CAC\"))\n"
+                    "(defn t [] :document (theme-doc (record-new [:ref :uidoc/theme] \"#FF3CAC\")))\n"
                     "(defn t-css [] :string (render-theme-header (t)))\n"
                     "(defn t-dig [] :string (theme-digest (t)))\n"
                     "(defn t-print [] :string (theme-print (t)))\n"

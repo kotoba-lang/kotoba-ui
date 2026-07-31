@@ -3,16 +3,16 @@
  ;; re-exports their public API, plus shell/theme. css is required by shell.style.
  :deps {io.github.kotoba-lang/shitsuke
         {:git/url "https://github.com/kotoba-lang/shitsuke.git"
-         ;; shitsuke T5.2 form-A guest records tip
-         :git/sha "832d2bd09856d38f43558aa5d20446124d7cc844"}
+         ;; shitsuke document-plane guest records tip
+         :git/sha "eeacdb93ce6cfbcca6b190d2c4bd21c46fb17b75"}
         io.github.kotoba-lang/liquid-glass-ui
         {:git/url "https://github.com/kotoba-lang/liquid-glass-ui.git"
-         ;; liquid-glass-ui T5.2 form-A guest records tip
-         :git/sha "c9f11baf9a9e1dd125ed1f9af1dc352b0a19acd6"}
+         ;; liquid-glass-ui document-plane guest records tip
+         :git/sha "5edd719a33846c1cc0441778ed3bb23c8a0fc362"}
         io.github.kotoba-lang/css
         {:git/url "https://github.com/kotoba-lang/css.git"
-         ;; css T5.2 form-A + document decl guest records tip
-         :git/sha "19274463f98768e59a81537fe78587435378657a"}}
+         ;; css document-plane rule-doc guest records tip
+         :git/sha "ba2121384f3ad12417a89078d50b91491aba352b"}}
  :aliases
  {:test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
@@ -22,8 +22,8 @@
                        :git/sha "fb766e2f79c088de05e289554c9de049e7909bd3"}
                       io.github.kotoba-lang/compiler
                       {:git/url "https://github.com/kotoba-lang/compiler.git"
-                       ;; T5.2 native guest records (record-new / record-get sugar)
-                       :git/sha "98b56bdb6886236281b634cc3409088ed2fe72a4"}}
+                       ;; document-in-record: :document as closed guest-record field
+                       :git/sha "7691b1aeb7baa22785b6fbb5689133de85dacde6"}}
          :main-opts ["-m" "cognitect.test-runner"]
          :exec-fn cognitect.test-runner.api/test}
   :local {:override-deps {io.github.kotoba-lang/shitsuke {:local/root "../shitsuke"}
