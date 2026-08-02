@@ -23,7 +23,9 @@
             [kotoba-ui.theme :as theme]
             [kotoba-ui.shell :as shell]
             [kotoba-ui.shell.style :as shell-style]
-            [kotoba-ui.product :as product]))
+            [kotoba-ui.product :as product]
+            [byoubu.core :as byoubu]
+            [byoubu-ui.core :as backdrop-ui]))
 
 ;; -- hiccup (shitsuke.hiccup) -------------------------------------------------
 
@@ -126,6 +128,22 @@
 (def metric product/metric)
 (def empty-state product/empty-state)
 (def data-table product/data-table)
+
+;; -- backdrops (byoubu / byoubu-ui) -------------------------------------------
+;; The scenery behind content. `theme-css` already emits the plate stylesheet
+;; when a theme names a `:backdrop`, so an app needs only `backdrop` here and
+;; the one theme map — the same rule-1 discipline as every other alias.
+;;
+;;   (kotoba-ui/theme-css {:backdrop :purple-desert})
+;;   (kotoba-ui/backdrop {:backdrop :purple-desert :assets-base "/assets"} ...)
+
+(def backdrop backdrop-ui/backdrop)
+(def backdrop-css backdrop-ui/component-css)
+(def backdrop-theme backdrop-ui/theme-for)
+(def backdrop-glass-surface backdrop-ui/glass-surface)
+(def backdrops byoubu/ids)
+(def backdrop-facts byoubu/facts)
+(def backdrop-poster-url byoubu/poster-url)
 
 ;; -- responsive constants -----------------------------------------------------
 ;; An app whose own CSS reacts to the app-shell's layout needs the SAME

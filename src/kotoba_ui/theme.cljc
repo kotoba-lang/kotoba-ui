@@ -21,7 +21,8 @@
 
   Portable .cljc, zero third-party deps, babashka-safe (no `format`, no
   reader conditionals — hex parsing is done with a digit lookup string)."
-  (:require [shitsuke.hig :as hig]
+  (:require [byoubu-ui.core :as byoubu-ui]
+            [shitsuke.hig :as hig]
             [shitsuke.tokens :as tokens]
             [liquid-glass.tokens :as glass-tokens]
             [liquid-glass.style :as glass-style]
@@ -70,26 +71,46 @@
 ;; ---------------------------------------------------------------------------
 ;; Theme -> per-library override maps
 
+(defn resolve-theme
+  "A theme map with a `:backdrop` expanded into the accent / appearance /
+  ink / page-background it implies.
+
+  Explicit keys always win: `{:backdrop :purple-desert :accent \"#ff0000\"}`
+  keeps the red accent and takes the derived appearance and ink. Without
+  `:backdrop` this is the identity, so nothing changes for themes that do not
+  use one.
+
+  Every public fn here resolves first, which is what lets an app pass ONE map
+  — `(theme-css {:backdrop :purple-desert})` — and get a page whose accent,
+  text colour, browser chrome and backdrop all agree. Deriving those by hand
+  per page is the failure mode every backdrop asset library has."
+  [theme]
+  (if-let [b (:backdrop theme)]
+    (merge (byoubu-ui/theme-for b) (dissoc theme :backdrop) {:backdrop b})
+    theme))
+
 (defn- dark-accent [theme]
   (or (:accent-dark theme) (:accent theme)))
 
 (defn hig-overrides
   "shitsuke.hig override map for the light appearance: the theme accent as
   `{:hig/color {:tint ...}}`, deep-merged with the raw `:hig` escape hatch
-  (the raw map wins)."
+  (the raw map wins). A `:backdrop` is resolved first."
   [theme]
-  (tokens/deep-merge
-   (when-let [a (:accent theme)] {:hig/color {:tint a}})
-   (:hig theme)))
+  (let [theme (resolve-theme theme)]
+    (tokens/deep-merge
+     (when-let [a (:accent theme)] {:hig/color {:tint a}})
+     (:hig theme))))
 
 (defn hig-dark-overrides
   "shitsuke.hig override map for the dark appearance (`:accent-dark`,
   defaulting to `:accent`), deep-merged with the raw `:hig-dark` escape
-  hatch."
+  hatch. A `:backdrop` is resolved first."
   [theme]
-  (tokens/deep-merge
-   (when-let [a (dark-accent theme)] {:hig/color {:tint a}})
-   (:hig-dark theme)))
+  (let [theme (resolve-theme theme)]
+    (tokens/deep-merge
+     (when-let [a (dark-accent theme)] {:hig/color {:tint a}})
+     (:hig-dark theme))))
 
 (defn- accent-glass-tokens [accent]
   (when accent
@@ -100,21 +121,24 @@
 (defn glass-overrides
   "liquid-glass token override map for the light scheme: the theme accent
   converted to the `:liquid-glass/accent` rgba pair (same alphas as the
-  library defaults), deep-merged with the raw `:glass` escape hatch."
+  library defaults), deep-merged with the raw `:glass` escape hatch. A
+  `:backdrop` is resolved first."
   [theme]
-  (tokens/deep-merge
-   (accent-glass-tokens (:accent theme))
-   (:glass theme)))
+  (let [theme (resolve-theme theme)]
+    (tokens/deep-merge
+     (accent-glass-tokens (:accent theme))
+     (:glass theme))))
 
 (defn glass-dark-overrides
   "liquid-glass dark-scheme override map (`:accent-dark`, defaulting to
   `:accent`), deep-merged with the raw `:glass-dark` escape hatch. Applied
   inside the dark media query / attribute blocks by liquid-glass's own
-  variable-redeclaration mechanism."
+  variable-redeclaration mechanism. A `:backdrop` is resolved first."
   [theme]
-  (tokens/deep-merge
-   (accent-glass-tokens (dark-accent theme))
-   (:glass-dark theme)))
+  (let [theme (resolve-theme theme)]
+    (tokens/deep-merge
+     (accent-glass-tokens (dark-accent theme))
+     (:glass-dark theme))))
 
 (defn theme-colors
   "The resolved page background per appearance — the color the browser
@@ -134,7 +158,7 @@
   :auto (follow prefers-color-scheme — attribute omitted), \"light\"/\"dark\"
   for a forced appearance."
   [theme]
-  (case (:appearance theme :auto)
+  (case (:appearance (resolve-theme theme) :auto)
     :light "light"
     :dark  "dark"
     nil))
@@ -159,7 +183,8 @@
   `@layer kotoba.hig` / `@layer kotoba.glass`."
   ([] (theme-css nil))
   ([theme]
-   (let [ho  (hig-overrides theme)
+   (let [theme (resolve-theme theme)
+         ho  (hig-overrides theme)
          hdo (hig-dark-overrides theme)
          go  (glass-overrides theme)
          gdo (glass-dark-overrides theme)
@@ -186,4 +211,11 @@
           ;; is what shipped while `product.cljc` was on main but nothing
           ;; pulled its CSS into the bundle.
           (shell-style/shell-css) "\n"
-          product/product-css))))
+          product/product-css
+          ;; The backdrop plate's structural rules, but ONLY when the theme
+          ;; actually names a backdrop — a page without one should not carry
+          ;; stacking/print/reduced-motion rules for an element it never
+          ;; renders. The per-backdrop gradients are an inline style on the
+          ;; instance, not part of this bundle.
+          (when (:backdrop theme)
+            (str "\n" (byoubu-ui/root-css) "\n" (byoubu-ui/component-css)))))))
