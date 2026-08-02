@@ -160,6 +160,29 @@ regression pass.
 | Use shell (`grid`/`app-shell`/`stack`) — `min-width: 0` + `overflow-wrap` are built in | Forget `min-width: 0` on grid/flex children (a long URL in `<main>` blew the page width in production) |
 | Dark mode via tokens: `:appearance` + `--hig-*` vars flip everything | Hand-maintain a second palette behind your own `@media (prefers-color-scheme: dark)` |
 
+## 5.5 Backdrops
+
+`liquid-glass` is a material designed to have something behind it. That
+something is `kotoba-lang/byoubu` — a catalog of backdrops as data, reachable
+from core like everything else:
+
+```clojure
+(kotoba-ui/theme-css {:backdrop :purple-desert})     ; accent + ink + chrome
+(kotoba-ui/backdrop {:backdrop :purple-desert
+                     :assets-base "/assets"}          ; tier-1 poster; optional
+  content)
+```
+
+Naming a `:backdrop` in the theme map is enough: accent, label ink,
+`data-appearance` and `<meta theme-color>` all come from that backdrop's
+*measured* palette, and the plate stylesheet is appended to the bundle. Your
+explicit keys still win. Do not derive a text colour for a backdrop by hand —
+`(kotoba-ui/backdrop-facts :purple-desert)` already knows it, and knows it per
+delivery tier.
+
+Without `:assets-base` the plate is CSS gradients only: about a kilobyte, first
+frame, no network. That is a complete page, not a degraded one.
+
 ## 6. Browser mount
 
 The same view hiccup mounts live in the browser through shitsuke's reagent
