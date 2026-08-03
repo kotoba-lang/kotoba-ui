@@ -132,17 +132,15 @@
                   :appearance (document-string appearance))))
 
 (defn accent-of [d :document] :string
-  (option-value-of [:option :string]
+  (option-or
     (document-string-value
-      (option-value-of [:option :document]
-        (document-get d :accent) (document-null)))
+      (option-or (document-get d :accent) (document-null)))
     "#000000"))
 
 (defn appearance-of [d :document] :string
-  (option-value-of [:option :string]
+  (option-or
     (document-string-value
-      (option-value-of [:option :document]
-        (document-get d :appearance) (document-null)))
+      (option-or (document-get d :appearance) (document-null)))
     "auto"))
 
 ;; --- accent CSS decls (same bytes as form-A) ------------------------------
