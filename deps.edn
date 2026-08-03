@@ -3,8 +3,8 @@
  ;; re-exports their public API, plus shell/theme. css is required by shell.style.
  :deps {io.github.kotoba-lang/shitsuke
         {:git/url "https://github.com/kotoba-lang/shitsuke.git"
-         ;; inferred option fallback in document renderers
-         :git/sha "378923d2195e7892396366c9cf99727995d0a58b"}
+         ;; SSR が reagent の :key を属性として出さなくなった修正込み
+         :git/sha "b621194e9d59798fde60f6731aeb2fde44208e7d"}
         io.github.kotoba-lang/liquid-glass-ui
         {:git/url "https://github.com/kotoba-lang/liquid-glass-ui.git"
          ;; inferred option fallback in token document renderer
