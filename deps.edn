@@ -3,16 +3,16 @@
  ;; re-exports their public API, plus shell/theme. css is required by shell.style.
  :deps {io.github.kotoba-lang/shitsuke
         {:git/url "https://github.com/kotoba-lang/shitsuke.git"
-         ;; shitsuke document-plane guest records tip
-         :git/sha "eeacdb93ce6cfbcca6b190d2c4bd21c46fb17b75"}
+         ;; inferred option fallback in document renderers
+         :git/sha "378923d2195e7892396366c9cf99727995d0a58b"}
         io.github.kotoba-lang/liquid-glass-ui
         {:git/url "https://github.com/kotoba-lang/liquid-glass-ui.git"
-         ;; liquid-glass-ui document-plane guest records tip
-         :git/sha "5edd719a33846c1cc0441778ed3bb23c8a0fc362"}
+         ;; inferred option fallback in token document renderer
+         :git/sha "4f8cfb0c415eb8844bb5eb87c9dde9e92adb70ef"}
         io.github.kotoba-lang/css
         {:git/url "https://github.com/kotoba-lang/css.git"
-         ;; css document-plane rule-doc guest records tip
-         :git/sha "ba2121384f3ad12417a89078d50b91491aba352b"}
+         ;; inferred option fallback in document renderer
+         :git/sha "e10adeb678148eccb9a069819454ceb40ec8ee91"}
         io.github.kotoba-lang/byoubu-ui
         {:git/url "https://github.com/kotoba-lang/byoubu-ui.git"
          ;; backdrop plate + tier-1 posters
@@ -26,8 +26,8 @@
                        :git/sha "fb766e2f79c088de05e289554c9de049e7909bd3"}
                       io.github.kotoba-lang/compiler
                       {:git/url "https://github.com/kotoba-lang/compiler.git"
-                       ;; document-in-record: :document as closed guest-record field
-                       :git/sha "7691b1aeb7baa22785b6fbb5689133de85dacde6"}}
+                       ;; inferred option fallback and contextual document keys
+                       :git/sha "c3be07fb38bf457a159a2b304152e18693f9b0b6"}}
          :main-opts ["-m" "cognitect.test-runner"]
          :exec-fn cognitect.test-runner.api/test}
   :local {:override-deps {io.github.kotoba-lang/shitsuke {:local/root "../shitsuke"}
