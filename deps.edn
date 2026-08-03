@@ -8,7 +8,7 @@
         io.github.kotoba-lang/liquid-glass-ui
         {:git/url "https://github.com/kotoba-lang/liquid-glass-ui.git"
          ;; inferred option fallback in token document renderer
-         :git/sha "4f8cfb0c415eb8844bb5eb87c9dde9e92adb70ef"}
+         :git/sha "ddb0b1a85ecfdcd4e91ddacafb5e100752439860"}
         io.github.kotoba-lang/css
         {:git/url "https://github.com/kotoba-lang/css.git"
          ;; inferred option fallback in document renderer
