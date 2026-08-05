@@ -4,7 +4,7 @@
  :deps {io.github.kotoba-lang/shitsuke
         {:git/url "https://github.com/kotoba-lang/shitsuke.git"
          ;; button + select :attrs passthrough (silent-drop fixes)
-         :git/sha "5cc6b4fe3ed7116efba853a938148a130935069c"}
+         :git/sha "c0c156c4fd7654830682a58a5d1c8838f274a394"}
         io.github.kotoba-lang/liquid-glass-ui
         {:git/url "https://github.com/kotoba-lang/liquid-glass-ui.git"
          ;; inferred option fallback in token document renderer
