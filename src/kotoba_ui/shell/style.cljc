@@ -131,7 +131,29 @@
    ;; min-width:0 + overflow-wrap: the exact grid-item overflow bug that
    ;; shipped in production (a wide <pre>/long URL in main stretched the
    ;; grid track past the viewport) — guarded here so apps never re-learn it.
-   [".kotoba-shell__app-main" {:min-width "0" :overflow-wrap "break-word"}]])
+   [".kotoba-shell__app-main" {:min-width "0" :overflow-wrap "break-word"}]
+
+   ;; --- app-shell :fill — the editor frame ---------------------------------
+   ;; The default app-shell is a DOCUMENT: min-height means it grows past the
+   ;; viewport and the page scrolls. An editor is the opposite — the frame is
+   ;; exactly the viewport, the canvas takes the leftover space, and only the
+   ;; individual panes scroll. Without this, every editor app re-derives the
+   ;; same four rules in its own CSS (height/overflow/align-items/min-height),
+   ;; which is precisely the hand-written layout CSS rule 4 exists to prevent.
+   ;; Structure only: no color, no type, no spacing invented here.
+   [".kotoba-shell__app--fill" {:height "100vh" :min-height "0" :overflow "hidden"}]
+   [".kotoba-shell__app--fill" {:height "100dvh"}]
+   ;; align-items:start (the document default) would collapse each pane to its
+   ;; content height; a filled body stretches them to the row instead.
+   [".kotoba-shell__app--fill .kotoba-shell__app-body"
+    {:align-items "stretch" :min-height "0"}]
+   ;; min-height:0 on the panes: without it a flex/grid child refuses to shrink
+   ;; below its content, so an overflowing pane pushes the frame open again
+   ;; instead of scrolling inside itself.
+   [".kotoba-shell__app--fill .kotoba-shell__app-sidebar"
+    {:min-height "0" :overflow "auto"}]
+   [".kotoba-shell__app--fill .kotoba-shell__app-main"
+    {:min-height "0" :display "flex" :flex-direction "column"}]])
 
 (defn- responsive-css
   "The sidebar-collapse media query: under `sidebar-breakpoint` the
@@ -143,7 +165,13 @@
                {:grid-template-columns "minmax(0, 1fr)"}]
               [".kotoba-shell__app-sidebar"
                {:border-right "none"
-                :border-bottom "var(--hig-hairline) solid var(--hig-color-separator)"}]]))
+                :border-bottom "var(--hig-hairline) solid var(--hig-color-separator)"}]
+              ;; Collapsed + :fill — the two panes are now rows inside a frame
+              ;; that cannot grow. Left implicit, both rows would size to
+              ;; content and the taller one would win; name them so the sidebar
+              ;; keeps its own height and main absorbs the remainder.
+              [".kotoba-shell__app--fill.kotoba-shell__app--with-sidebar .kotoba-shell__app-body"
+               {:grid-template-rows "auto minmax(0, 1fr)"}]]))
 
 (defn shell-css
   "All kotoba-shell__* structural rules (plus the sidebar-collapse media
