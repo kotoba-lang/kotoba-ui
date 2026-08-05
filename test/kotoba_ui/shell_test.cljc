@@ -106,8 +106,10 @@
       ;; The unfilled frame keeps min-height (a document may exceed the
       ;; viewport); the filled one pins height and clips, or the canvas
       ;; inside it would push the page open instead of scrolling.
-      (is (str/includes? css ".kotoba-shell__app--fill { height: 100vh; min-height: 0; overflow: hidden; }"))
-      (is (str/includes? css ".kotoba-shell__app--fill { height: 100dvh; }"))
+      ;; 100%, not 100dvh — a filled shell fills its container, so the same
+      ;; editor can be embedded under a host header without overflowing it.
+      (is (str/includes? css ".kotoba-shell__app--fill { height: 100%; min-height: 0; overflow: hidden; }"))
+      (is (not (str/includes? css ".kotoba-shell__app--fill { height: 100dvh; }")))
       (is (str/includes? css ".kotoba-shell__app--fill .kotoba-shell__app-main { min-height: 0;"))
       ;; Panes must be allowed to shrink below content, else the frame reopens.
       (is (str/includes? css ".kotoba-shell__app--fill .kotoba-shell__app-sidebar { min-height: 0; overflow: auto; }"))

@@ -188,16 +188,22 @@
   `overflow-wrap: break-word` (the grid-item overflow guard — this exact
   bug shipped in production).
 
-  `:fill true` switches the frame from a document to an **editor**: exactly
-  the viewport tall instead of at least, `overflow: hidden` at the frame,
-  panes stretched to the row and free to scroll inside themselves. Reach for
-  it when the content is a canvas/timeline/tree that should consume the
+  `:fill true` switches the frame from a document to an **editor**: bounded
+  instead of at-least-viewport, `overflow: hidden` at the frame, panes
+  stretched to the row and free to scroll inside themselves. Reach for it
+  when the content is a canvas/timeline/tree that should consume the
   leftover space rather than extend the page — a DAW, an NLE, a drawing
   surface. Everything it sets is structural (height / overflow /
   align-items / min-height); colors, type and spacing are untouched, so a
   filled shell is themed exactly like an unfilled one. It exists because
   editors were otherwise re-deriving these same four rules in app CSS,
-  which is the hand-written layout this scaffold layer replaces."
+  which is the hand-written layout this scaffold layer replaces.
+
+  A filled shell fills its **container**, not the viewport — the same editor
+  gets mounted both full-page and embedded under a host's own header, and a
+  viewport-locked frame overflows the latter. For the full-page case the
+  host page adds `html, body { height: 100% }`; only it knows it owns the
+  viewport."
   [& args]
   (let [[opts content] (split-opts args)
         {:keys [nav sidebar fill]} opts]

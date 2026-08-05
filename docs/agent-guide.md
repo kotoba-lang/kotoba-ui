@@ -53,10 +53,12 @@ for app use is re-exported by `kotoba-ui.core`.
    Building an **editor** rather than a document — a canvas, timeline or
    tree that should consume the leftover space instead of extending the
    page? `(ui/app-shell {:fill true :nav … :sidebar …} canvas)`. The frame
-   becomes exactly the viewport, panes stretch and scroll inside
-   themselves, and your app CSS stays at zero lines. It is structure only
-   (height / overflow / align-items / min-height), so a filled shell is
-   themed identically to an unfilled one.
+   becomes bounded, panes stretch and scroll inside themselves, and your
+   app CSS stays at zero lines. It is structure only (height / overflow /
+   align-items / min-height), so a filled shell is themed identically to
+   an unfilled one. It fills its **container**, so a full-page editor
+   still adds `html, body { height: 100% }` — the one thing only the page
+   can know.
 5. **Theme = one map.** `{:accent "#RRGGBB" :accent-dark "#RRGGBB"
    :appearance :auto|:light|:dark :hig {...} :glass {...}}` passed to
    `->page` (or `theme-css`). That is the *only* place a hex color is

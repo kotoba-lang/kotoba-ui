@@ -136,13 +136,20 @@
    ;; --- app-shell :fill — the editor frame ---------------------------------
    ;; The default app-shell is a DOCUMENT: min-height means it grows past the
    ;; viewport and the page scrolls. An editor is the opposite — the frame is
-   ;; exactly the viewport, the canvas takes the leftover space, and only the
-   ;; individual panes scroll. Without this, every editor app re-derives the
-   ;; same four rules in its own CSS (height/overflow/align-items/min-height),
-   ;; which is precisely the hand-written layout CSS rule 4 exists to prevent.
+   ;; bounded, the canvas takes the leftover space, and only the individual
+   ;; panes scroll. Without this, every editor app re-derives the same four
+   ;; rules in its own CSS (height/overflow/align-items/min-height), which is
+   ;; precisely the hand-written layout CSS rule 4 exists to prevent.
    ;; Structure only: no color, no type, no spacing invented here.
-   [".kotoba-shell__app--fill" {:height "100vh" :min-height "0" :overflow "hidden"}]
-   [".kotoba-shell__app--fill" {:height "100dvh"}]
+   ;;
+   ;; `height: 100%`, not `100dvh`: a filled shell fills its CONTAINER. The
+   ;; same editor is mounted full-page and embedded inside a host's own
+   ;; chrome (app-aozora puts one under a header, in a flex item), and a
+   ;; viewport-locked frame overflows that box by exactly the header. Only
+   ;; the host knows which case it is, so a full-viewport editor pairs this
+   ;; with `html, body { height: 100% }` — one line, in the page that owns
+   ;; the viewport.
+   [".kotoba-shell__app--fill" {:height "100%" :min-height "0" :overflow "hidden"}]
    ;; align-items:start (the document default) would collapse each pane to its
    ;; content height; a filled body stretches them to the row instead.
    [".kotoba-shell__app--fill .kotoba-shell__app-body"
