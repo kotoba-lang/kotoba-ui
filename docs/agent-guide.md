@@ -50,6 +50,13 @@ for app use is re-exported by `kotoba-ui.core`.
    consumer duplicated the grid rules for a `#business-grid` hook before
    this existed). `:attrs` can't clobber the component's own
    :class/:style; on `page` these land on `<body>`.
+   Building an **editor** rather than a document — a canvas, timeline or
+   tree that should consume the leftover space instead of extending the
+   page? `(ui/app-shell {:fill true :nav … :sidebar …} canvas)`. The frame
+   becomes exactly the viewport, panes stretch and scroll inside
+   themselves, and your app CSS stays at zero lines. It is structure only
+   (height / overflow / align-items / min-height), so a filled shell is
+   themed identically to an unfilled one.
 5. **Theme = one map.** `{:accent "#RRGGBB" :accent-dark "#RRGGBB"
    :appearance :auto|:light|:dark :hig {...} :glass {...}}` passed to
    `->page` (or `theme-css`). That is the *only* place a hex color is
@@ -158,6 +165,7 @@ regression pass.
 | Use the system palette for status: `var(--hig-palette-green)` / `-orange` / `-red` / … | Invent hex status colors (`#4caf50`-style greens that match nothing) |
 | Use token colors for text on washes/gradients — they already pass ≥ 4.5:1 | Write white-on-gradient text without checking contrast |
 | Use shell (`grid`/`app-shell`/`stack`) — `min-width: 0` + `overflow-wrap` are built in | Forget `min-width: 0` on grid/flex children (a long URL in `<main>` blew the page width in production) |
+| Reach for `app-shell {:fill true}` when the content is a canvas/editor | Re-derive the editor frame (`height:100dvh` + `overflow:hidden` + `align-items:stretch` + `min-height:0`) in app CSS — four rules every editor was rewriting until `:fill` existed |
 | Dark mode via tokens: `:appearance` + `--hig-*` vars flip everything | Hand-maintain a second palette behind your own `@media (prefers-color-scheme: dark)` |
 
 ## 5.5 Backdrops

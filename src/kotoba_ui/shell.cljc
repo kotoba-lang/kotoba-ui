@@ -181,17 +181,30 @@
 (defn app-shell
   "Whole-app frame. opts: :nav (typically a kotoba-ui nav-bar/toolbar —
   rendered sticky at the top), :sidebar (optional; fixed-width desktop
-  column that collapses to single-column under the breakpoint), plus the
-  shared root opts :id / :class / :attrs (ns docstring).
+  column that collapses to single-column under the breakpoint), :fill
+  (see below), plus the shared root opts :id / :class / :attrs (ns
+  docstring).
   `content` renders in a `<main>` with `min-width: 0` +
   `overflow-wrap: break-word` (the grid-item overflow guard — this exact
-  bug shipped in production)."
+  bug shipped in production).
+
+  `:fill true` switches the frame from a document to an **editor**: exactly
+  the viewport tall instead of at least, `overflow: hidden` at the frame,
+  panes stretched to the row and free to scroll inside themselves. Reach for
+  it when the content is a canvas/timeline/tree that should consume the
+  leftover space rather than extend the page — a DAW, an NLE, a drawing
+  surface. Everything it sets is structural (height / overflow /
+  align-items / min-height); colors, type and spacing are untouched, so a
+  filled shell is themed exactly like an unfilled one. It exists because
+  editors were otherwise re-deriving these same four rules in app CSS,
+  which is the hand-written layout this scaffold layer replaces."
   [& args]
   (let [[opts content] (split-opts args)
-        {:keys [nav sidebar]} opts]
+        {:keys [nav sidebar fill]} opts]
     [:div (with-root-attrs
             {:class (str (class-name :app)
-                         (when sidebar (str " " (class-name "app--with-sidebar"))))}
+                         (when sidebar (str " " (class-name "app--with-sidebar")))
+                         (when fill (str " " (class-name "app--fill"))))}
             opts)
      (when nav [:div {:class (class-name :app-nav)} nav])
      [:div {:class (class-name :app-body)}

@@ -3,6 +3,7 @@
             [clojure.string :as str]
             [shitsuke.hiccup :as hiccup]
             [kotoba-ui.shell :as shell]
+            [kotoba-ui.shell.style :as style]
             [kotoba-ui.core :as ui]))
 
 (defn- count-occurrences [s sub]
@@ -90,7 +91,28 @@
   (testing ":sidebar adds the two-column modifier + <aside>"
     (let [html (hiccup/->html (shell/app-shell {:sidebar [:nav "links"]} [:p "c"]))]
       (is (str/includes? html "kotoba-shell__app--with-sidebar"))
-      (is (str/includes? html "<aside class=\"kotoba-shell__app-sidebar\"")))))
+      (is (str/includes? html "<aside class=\"kotoba-shell__app-sidebar\""))))
+  (testing ":fill adds the editor-frame modifier, and is absent by default"
+    (is (str/includes? (hiccup/->html (shell/app-shell {:fill true} [:p "c"]))
+                       "kotoba-shell__app--fill"))
+    (is (not (str/includes? (hiccup/->html (shell/app-shell {} [:p "c"]))
+                            "kotoba-shell__app--fill"))))
+  (testing ":fill composes with :sidebar (both modifiers on one element)"
+    (let [html (hiccup/->html (shell/app-shell {:fill true :sidebar [:nav "l"]} [:p "c"]))]
+      (is (str/includes? html "kotoba-shell__app--with-sidebar"))
+      (is (str/includes? html "kotoba-shell__app--fill"))))
+  (testing ":fill turns the frame from at-least-viewport into exactly-viewport"
+    (let [css (style/shell-css)]
+      ;; The unfilled frame keeps min-height (a document may exceed the
+      ;; viewport); the filled one pins height and clips, or the canvas
+      ;; inside it would push the page open instead of scrolling.
+      (is (str/includes? css ".kotoba-shell__app--fill { height: 100vh; min-height: 0; overflow: hidden; }"))
+      (is (str/includes? css ".kotoba-shell__app--fill { height: 100dvh; }"))
+      (is (str/includes? css ".kotoba-shell__app--fill .kotoba-shell__app-main { min-height: 0;"))
+      ;; Panes must be allowed to shrink below content, else the frame reopens.
+      (is (str/includes? css ".kotoba-shell__app--fill .kotoba-shell__app-sidebar { min-height: 0; overflow: auto; }"))
+      ;; The unfilled frame is untouched — a document still grows past the fold.
+      (is (str/includes? css ".kotoba-shell__app { min-height: 100dvh; }")))))
 
 (deftest page-test
   (let [html (hiccup/->html (shell/page {:title "T" :description "D"
