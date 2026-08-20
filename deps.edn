@@ -24,8 +24,8 @@
                       io.github.kotoba-lang/design-quality
                       {:git/url "https://github.com/kotoba-lang/design-quality.git"
                        :git/sha "fb766e2f79c088de05e289554c9de049e7909bd3"}
-                      io.github.kotoba-lang/compiler
-                      {:git/url "https://github.com/kotoba-lang/compiler.git"
+                      io.github.kotoba-lang/amu
+                      {:git/url "https://github.com/kotoba-lang/amu.git"
                        ;; inferred option fallback and contextual document keys
                        :git/sha "c3be07fb38bf457a159a2b304152e18693f9b0b6"}}
          :main-opts ["-m" "cognitect.test-runner"]
