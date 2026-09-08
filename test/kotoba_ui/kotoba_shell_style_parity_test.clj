@@ -17,7 +17,7 @@
   reproduce `shell-css` byte for byte.
 
   What stayed host-side and why is listed in the port source header."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [css.core :as css]
             [kotoba.compiler.core :as compiler]

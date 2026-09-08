@@ -10,7 +10,7 @@
   The oracle for the constants is the live rule set — the value is read back out
   of `shell-rules`, not out of a literal copied into this file. A test that
   copies the literal only proves the test agrees with itself."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
             [kotoba.kir :as ir]

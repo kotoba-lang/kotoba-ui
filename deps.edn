@@ -1,7 +1,12 @@
 {:paths ["src"]
  ;; Composition layer: kotoba-ui.core requires shitsuke + liquid-glass-ui and
  ;; re-exports their public API, plus shell/theme. css is required by shell.style.
- :deps {io.github.kotoba-lang/shitsuke
+ :deps {
+        ;; kotoba.lang.text, not clojure.string. Pinned as an explicit floor:
+        ;; tools.deps takes the NEWEST sha it is shown, so without a floor here
+        ;; this repo silently rides whatever a sibling happens to name.
+        io.github.kotoba-lang/text {:git/sha "73bdb13ae7a3d004b44bca08be03a3191157a38f"}
+       io.github.kotoba-lang/shitsuke
         {:git/url "https://github.com/kotoba-lang/shitsuke.git"
          ;; button + select :attrs passthrough (silent-drop fixes)
          :git/sha "c0c156c4fd7654830682a58a5d1c8838f274a394"}

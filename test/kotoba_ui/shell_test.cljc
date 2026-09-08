@@ -1,6 +1,6 @@
 (ns kotoba-ui.shell-test
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [shitsuke.hiccup :as hiccup]
             [kotoba-ui.shell :as shell]
             [kotoba-ui.shell.style :as style]

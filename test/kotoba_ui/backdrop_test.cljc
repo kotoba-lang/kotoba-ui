@@ -1,7 +1,7 @@
 (ns kotoba-ui.backdrop-test
   "The byoubu backdrop integration: one theme map should be enough."
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [byoubu.core :as byoubu]
             [kotoba-ui.theme :as theme]
             [kotoba-ui.core :as ui]))
