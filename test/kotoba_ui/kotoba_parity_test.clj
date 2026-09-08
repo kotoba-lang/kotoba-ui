@@ -12,7 +12,7 @@
   Compiled and executed through the KIR interpreter in this same JVM.
 
   T5.2: multi-arg pure folded into guest records; cases call via record-new."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
             [kotoba.kir :as ir]

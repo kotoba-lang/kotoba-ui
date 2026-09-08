@@ -24,7 +24,7 @@
   `:attrs :style`. For `page` these land on `<body>`. So: need an id /
   class / data-attr on a scaffold? Pass these — don't mirror shell CSS in
   app CSS."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [kotoba-ui.theme :as theme]
             [kotoba-ui.shell.style :as style]))
 

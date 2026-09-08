@@ -1,6 +1,6 @@
 (ns kotoba-ui.product
   "Semantic product-surface primitives for dashboards and consoles."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn- classes [base extra]
   (str base (when (seq extra) (str " " extra))))

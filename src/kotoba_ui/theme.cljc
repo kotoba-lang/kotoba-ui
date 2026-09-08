@@ -28,7 +28,7 @@
             [liquid-glass.style :as glass-style]
             [kotoba-ui.shell.style :as shell-style]
             [kotoba-ui.product :as product]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 ;; ---------------------------------------------------------------------------
 ;; hex -> rgba (portable: no Long/parseLong / js/parseInt, no reader conditionals)
@@ -36,7 +36,7 @@
 (def ^:private hex-digits "0123456789abcdef")
 
 (defn- hex-digit [c]
-  (str/index-of hex-digits (str/lower-case (str c))))
+  (str/index-of hex-digits (str/lower (str c))))
 
 (defn- hex-byte [s i]
   (+ (* 16 (hex-digit (nth s i))) (hex-digit (nth s (inc i)))))

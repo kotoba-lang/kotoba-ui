@@ -10,7 +10,7 @@
 
   T5.2 + document-in-record: form-A and document-plane multi-arg pure fold
   into guest records (`:ui/*`, `:uidoc/*`)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
             [kotoba.kir :as ir]
