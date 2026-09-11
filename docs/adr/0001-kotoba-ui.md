@@ -10,7 +10,7 @@ Per ADR-2607270100 §10 / ADR-2607279200 Delivery #6, `kotoba/theme_core.kotoba`
 ports the pure composition-layer string core (`hex->rgba`, accent decls,
 layer-order, shell class/layout constants). Full `theme-css` still joins
 shitsuke + liquid-glass + shell on the host `.cljc` side. Consumer APIs are
-unchanged. Byte-equality is gated by `test/kotoba_ui/kotoba_parity_test.clj`.
+unchanged. Byte-equality is gated by `test/kotoba_ui/kotoba_parity_test.cljk`.
 Oracle-backed experiment ahead of W4; not the final composition API.
 - **Context tags**: ui, design-system, cljc, shitsuke, liquid-glass-ui
 - **Related**: `90-docs/adr/2607022800-kotoba-lang-default-uiux-appkit-uikit-interface-fundamentals.md`

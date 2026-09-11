@@ -8,7 +8,7 @@
 ;;
 ;; Ported by poolside/laguna-s-2.1 through kotoba-code's scripts/orbench and
 ;; gated by kotoba -M inspect / -M test (jvm-kir, js, wasm) / aarch64 native,
-;; plus test/kotoba_ui/kotoba_shell_parity_test.clj.
+;; plus test/kotoba_ui/kotoba_shell_parity_test.cljk.
 ;;
 ;; DELIBERATELY NOT HERE:
 ;;   * the class-join helper — `shell-cls` in kotoba/shell_style_core.kotoba
