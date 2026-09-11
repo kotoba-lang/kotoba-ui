@@ -9,7 +9,7 @@
   each page stay at or above a floor set from the honestly measured score
   minus a small margin, so any regression in the shell/page/theme output
   (dropping the viewport meta, losing safe-area insets, reintroducing bare
-  100vh, ...) fails `clojure -M:test` before it ships.
+  100vh, ...) fails `kbb -M:test` before it ships.
 
   Measured on 2026-07-13 (design-quality @ 36c03d4):
     initial: worked-example 87.18 / bare-shell 92.18 / dense-console 87.18

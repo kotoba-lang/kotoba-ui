@@ -92,8 +92,8 @@ experiment ahead of W4, not the final API. Byte-equality is gated by
 ## Tests
 
 ```bash
-clojure -M:test            # published git shitsuke + liquid-glass-ui deps
-clojure -M:local:test      # local ../shitsuke + ../liquid-glass-ui overrides
+kbb -M:test            # published git shitsuke + liquid-glass-ui deps
+kbb -M:local:test      # local ../shitsuke + ../liquid-glass-ui overrides
 ```
 
 `:test` includes a **design-quality self-scoring gate**
