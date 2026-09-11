@@ -140,7 +140,7 @@ nbb -m design-quality.cli score dist/  # same report on Node
 ```
 
 Or as a deftest, the way this repo gates itself
-(`test/kotoba_ui/design_quality_gate_test.cljc` — three representative
+(`test/kotoba_ui/design_quality_gate_test.cljk` — three representative
 `->page` pages, full 12-axis rubric, floors set from measured scores):
 
 ```clojure

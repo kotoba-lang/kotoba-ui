@@ -87,7 +87,7 @@ cascade layer-order/wrap, shell class-name and layout constants. Full
 `theme-css` composition (joining shitsuke + liquid-glass + shell host
 outputs) stays on the `.cljc` side. Consumer APIs are unchanged — oracle-backed
 experiment ahead of W4, not the final API. Byte-equality is gated by
-`test/kotoba_ui/kotoba_parity_test.clj` (compiler is test-only).
+`test/kotoba_ui/kotoba_parity_test.cljk` (compiler is test-only).
 
 ## Tests
 
@@ -97,7 +97,7 @@ clojure -M:local:test      # local ../shitsuke + ../liquid-glass-ui overrides
 ```
 
 `:test` includes a **design-quality self-scoring gate**
-(`test/kotoba_ui/design_quality_gate_test.cljc`): representative pages are
+(`test/kotoba_ui/design_quality_gate_test.cljk`): representative pages are
 rendered with `->page` and scored against
 [kotoba-lang/design-quality](https://github.com/kotoba-lang/design-quality)'s
 deterministic HIG/WCAG audit (ADR-2607132300 — an unmeasured metric is

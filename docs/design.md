@@ -1,8 +1,8 @@
 # kotoba-ui — design
 
 `kotoba-ui.core` is an alias layer plus the shell/theme page layer (see
-`src/kotoba_ui/core.cljc`, `src/kotoba_ui/shell.cljc`,
-`src/kotoba_ui/theme.cljc`; the paved-road usage recipe is
+`src/kotoba_ui/core.cljk`, `src/kotoba_ui/shell.cljk`,
+`src/kotoba_ui/theme.cljk`; the paved-road usage recipe is
 `docs/agent-guide.md`) — this document is not a second API reference for
 shitsuke/liquid-glass-ui (that lives in `liquid-glass-ui/docs/design.md` and
 `shitsuke/docs/design.md`).
@@ -19,7 +19,7 @@ per `90-docs/adr/2607022800-kotoba-lang-default-uiux-appkit-uikit-interface-fund
 | Typography | `shitsuke.hig` — the 11 Apple text styles as `--hig-text-*` vars + `.hig-*` utility classes (plus `shitsuke.tokens` v1 text tokens, `liquid-glass.tokens :ink`) | `.hig-*` classes via `theme-css`; `resolve-tokens`, `css-variables` |
 | Color & Materials | `shitsuke.hig` semantic colors + system palette (light/dark `--hig-color-*`/`--hig-palette-*`) + `liquid-glass.tokens` (`:surface`/`:elevation`/`:specular`/`:accent`) — the Apple-Liquid-Glass-equivalent material system; themed through one `kotoba-ui.theme` map | `theme-css`, `appearance-attr`, `hig-overrides`, `glass-overrides`, `resolve-tokens`, `resolve-dark-tokens`, `root-css` |
 | Navigation | `nav-bar`/`tab-bar`/`menu`/`sheet` | `nav-bar`, `tab-bar`, `menu`, `sheet` |
-| Controls | `button`/`toggle`/`slider` and the rest of the 29-component catalog | `button`, `toggle`, `slider`, … (see `src/kotoba_ui/core.cljc`) |
+| Controls | `button`/`toggle`/`slider` and the rest of the 29-component catalog | `button`, `toggle`, `slider`, … (see `src/kotoba_ui/core.cljk`) |
 | Motion | overlay enter/exit, spring settle, press morph (`liquid-glass-ui/docs/design.md` § "Motion & dynamic effects") | `component-css` (motion rules ship inside it — no separate motion API) |
 
 ## Platform bindings: appkit / uikit
