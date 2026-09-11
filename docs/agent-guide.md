@@ -135,8 +135,8 @@ After you build a page, render it and score it:
 
 ```bash
 # in your app: spit the ->page output, then (from a design-quality checkout)
-bb score rendered.html --min 95        # exits 1 below --min — CI-gate ready
-nbb -m design-quality.cli score dist/  # same report on Node
+kbb -M:score rendered.html --min 95        # exits 1 below --min — CI-gate ready
+kbb --backend sci -m design-quality.cli score dist/  # same report on Node
 ```
 
 Or as a deftest, the way this repo gates itself
@@ -211,7 +211,7 @@ already written for the other.
 - [ ] Typography only via the 11 `.hig-*` text styles / element defaults
 - [ ] ARIA, `:focus-visible`, reduced-motion intact; ≥ 4.5:1 contrast
 - [ ] Views are pure `.cljc` hiccup, dual-render clean (SSR `->page` + reagent)
-- [ ] **Measured**: rendered output scored with design-quality (`bb score
+- [ ] **Measured**: rendered output scored with design-quality (`kbb -M:score
       rendered.html --min <your floor>` or the deftest pattern in §4) and the
       report's findings addressed — an unmeasured page is theater
       (ADR-2607132300)
