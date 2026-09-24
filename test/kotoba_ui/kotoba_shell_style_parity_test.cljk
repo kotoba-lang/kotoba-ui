@@ -18,7 +18,7 @@
 
   What stayed host-side and why is listed in the port source header."
   (:require [kotoba.lang.text :as str]
-            [clojure.test :refer [deftest is testing]]
+            [kotoba.test :refer [deftest is testing]]
             [css.core :as css]
             [kotoba.compiler.core :as compiler]
             [kotoba.kir :as ir]

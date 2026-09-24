@@ -1,5 +1,5 @@
 (ns kotoba-ui.core-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [kotoba.lang.text :as str]
             [liquid-glass.components :as glass]
             [kotoba-ui.core :as ui]))
