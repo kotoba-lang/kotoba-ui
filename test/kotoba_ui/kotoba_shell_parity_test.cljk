@@ -11,7 +11,7 @@
   of `shell-rules`, not out of a literal copied into this file. A test that
   copies the literal only proves the test agrees with itself."
   (:require [kotoba.lang.text :as str]
-            [clojure.test :refer [deftest is testing]]
+            [kotoba.test :refer [deftest is testing]]
             [kotoba.compiler.core :as compiler]
             [kotoba.kir :as ir]
             [kotoba-ui.shell :as shell]

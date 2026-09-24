@@ -1,5 +1,5 @@
 (ns kotoba-ui.theme-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [kotoba.lang.text :as str]
             [kotoba-ui.theme :as theme]
             [kotoba-ui.core :as ui]))

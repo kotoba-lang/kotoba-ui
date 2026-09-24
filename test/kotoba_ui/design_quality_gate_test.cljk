@@ -18,7 +18,7 @@
     all three pages 100.0 / aggregate 100.0.
   Floors raised accordingly. RAISE floors when scores improve — never lower
   them to make a regression pass."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [design-quality.audit :as dq]
             [kotoba-ui.core :as ui]))
 
